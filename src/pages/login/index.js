@@ -149,10 +149,48 @@ const LoginPage = () => {
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mb-8 flex items-center gap-4 bg-white/20 backdrop-blur-md px-6 py-3 rounded-3xl border-2 border-white/30 w-fit"
+                        className="mb-8 flex items-center gap-6 bg-white/20 backdrop-blur-xl px-6 py-4 rounded-[40px] border-4 border-white/30 w-fit shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
                     >
-                        <Rocket className="text-white" size={28} />
-                        <span className="text-2xl font-black text-white italic tracking-tighter">DigiGyan Library</span>
+                        {/* --- Logo Image Container with Highlighting --- */}
+                        <motion.div
+                            whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                            animate={{
+                                boxShadow: [
+                                    "0 0 0px 0px rgba(255,255,255,0.4)",
+                                    "0 0 20px 10px rgba(255,255,255,0.2)",
+                                    "0 0 0px 0px rgba(255,255,255,0.4)"
+                                ]
+                            }}
+                            transition={{
+                                boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+                                type: "spring",
+                                stiffness: 300
+                            }}
+                            className="w-20 h-20 bg-white rounded-[25px] p-2 shadow-2xl border-4 border-white/50 overflow-hidden relative group"
+                        >
+                            {/* Animated Inner Shine */}
+                            <motion.div
+                                animate={{ x: [-100, 200] }}
+                                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+                                className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-[-20deg] z-10"
+                            />
+
+                            <img
+                                src="/logo.png"
+                                alt="DigiGyan Logo"
+                                className="w-full h-full object-contain relative z-20"
+                            />
+                        </motion.div>
+
+                        {/* --- Text Container --- */}
+                        <div className="flex flex-col">
+                            <span className="text-3xl md:text-4xl font-black text-white italic tracking-tighter drop-shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
+                                DigiGyan
+                            </span>
+                            <span className="text-[10px] font-black text-[#FFD93D] uppercase tracking-[0.3em] ml-1">
+                                Magic Library 📚
+                            </span>
+                        </div>
                     </motion.div>
 
                     {loadingCovers ? (

@@ -119,18 +119,45 @@ const DigiGyanNav = () => {
             >
                 <div className="flex items-center gap-10">
                     <motion.div
-                        whileHover={{ scale: 1.1, rotate: -5 }}
+                        initial={{ x: -100, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        whileHover={{ scale: 1.05, rotate: -3 }}
                         onClick={() => router.push('/')}
-                        className="text-2xl font-black text-white flex items-center gap-3 cursor-pointer drop-shadow-lg"
+                        className="text-2xl font-black text-white flex items-center gap-4 cursor-pointer drop-shadow-2xl group"
                     >
+                        {/* --- Glassmorphism Logo Container with Highlight --- */}
                         <motion.div
-                            animate={{ y: [0, -5, 0] }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            className="bg-white/20 p-2 rounded-2xl border-2 border-white/30"
+                            animate={{
+                                boxShadow: [
+                                    "0 0 0px 0px rgba(255,255,255,0.4)",
+                                    "0 0 20px 10px rgba(255,255,255,0.2)",
+                                    "0 0 0px 0px rgba(255,255,255,0.4)"
+                                ]
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="relative bg-white/20 p-2.5 rounded-[22px] border-4 border-white/30 backdrop-blur-xl group-hover:bg-white transition-all overflow-hidden"
                         >
-                            🚀
+                            {/* Animated Inner Shine */}
+                            <motion.div
+                                animate={{ x: [-100, 150] }}
+                                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
+                                className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-[-20deg] z-10"
+                            />
+
+                            <img
+                                src="/logo.png"
+                                alt="DigiGyan Logo"
+                                className="w-10 h-10 object-contain relative z-20 group-hover:scale-110 transition-transform"
+                            />
                         </motion.div>
-                        <span className="tracking-tighter italic">DigiGyan</span>
+
+                        {/* --- Typography Container --- */}
+                        <div className="flex flex-col">
+                            <span className="text-3xl font-black text-white italic tracking-tighter drop-shadow-md">
+                                DigiGyan
+                            </span>
+
+                        </div>
                     </motion.div>
 
                     {/* --- DYNAMIC SELECTORS --- */}
