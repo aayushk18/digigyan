@@ -32,6 +32,12 @@ const DigiGyanNav = () => {
     const [showClassDropdown, setShowClassDropdown] = useState(false);
     const [loading, setLoading] = useState({ cats: false, classes: false });
 
+    const handleSignIn = (e) => {
+        e.preventDefault();
+        login();
+        setShowLoginModal(false);
+    };
+
     const { PR_APP_KEY, PR_TOKEN } = config;
 
     // Fetch Categories
@@ -297,7 +303,7 @@ const DigiGyanNav = () => {
                                 <p className="text-slate-400 font-bold">Time for some magic!</p>
                             </div>
 
-                            <form onSubmit={handleSignIn} className="space-y-5">
+                            <form onSubmit={(e) => handleSignIn(e)} className="space-y-5">
                                 <div className="relative">
                                     <User className="absolute left-6 top-1/2 -translate-y-1/2 text-[#6C5CE7]" size={20} />
                                     <input type="text" placeholder="Username" required className="w-full pl-14 pr-6 py-5 bg-[#F8FAFF] rounded-[30px] outline-none border-4 border-transparent focus:border-[#E0DAFF] font-black" />
