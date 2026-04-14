@@ -209,39 +209,363 @@
 
 
 
+// import React, { useState, useEffect } from 'react';
+// import {
+//   Settings,
+//   LogOut,
+//   User,
+
+
+//   ChevronDown,
+
+
+
+//   ScanLine, FileEdit, FileText, Loader2, BookOpen, Lock
+
+// } from 'lucide-react';
+
+// import Link from 'next/link';
+// import DigiGyanTopNav from './panel';
+// import DigiGyanNav from '@/components/Navbar';
+// import { useApp } from '@/context/AppContext';
+
+// const UserPanel = () => {
+//   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+//   const { config, seriesId, classId, series, Class, isLoggedIn } = useApp();
+//   const [books, setBooks] = useState([]);
+//   const [loadingBooks, setLoadingBooks] = useState(false);
+
+//   const { PR_APP_KEY, PR_TOKEN } = config;
+
+//   useEffect(() => {
+//     const fetchBooks = async () => {
+//       if (!seriesId || !classId) {
+//         setBooks([]);
+//         return;
+//       }
+
+//       setLoadingBooks(true);
+//       try {
+//         const response = await fetch('https://apis.tlmate.com/content-api/books-list', {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({
+//             CBT_REQUEST_DATA: {
+//               PR_CLASS_ID: classId.toString(),
+//               PR_CATEGORY_ID: seriesId.toString(),
+//               PR_TOKEN,
+//               PR_APP_KEY
+//             }
+//           })
+//         });
+//         const result = await response.json();
+//         if (result.STATUS === "SUCCESS") {
+//           setBooks(result.DATA || []);
+//         } else {
+//           setBooks([]);
+//         }
+//       } catch (error) {
+//         console.error("Error fetching books:", error);
+//       } finally {
+//         setLoadingBooks(false);
+//       }
+//     };
+
+//     fetchBooks();
+//   }, [seriesId, classId, PR_APP_KEY, PR_TOKEN]);
+
+//   return (
+//     <div className="min-h-screen bg-[#F0F4FF] flex flex-col font-sans text-slate-800">
+//       {/* --- Top Navigation Header --- */}
+//       <DigiGyanNav />
+//       <div style={{ fontFamily: "'Nunito', sans-serif", minHeight: "100vh", background: "#F0F4FF", color: "#2D3436", overflowX: 'hidden' }}>
+//         <style>{`
+//         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+//         /* Bouncy Float Animation */
+//         .floating { animation: floating 3s ease-in-out infinite; }
+//         @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+//         /* Staggered Entrance for Cards */
+//         .fade-in-up {
+//           animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+//           opacity: 0;
+//         }
+
+//         @keyframes fadeInUp {
+//           from { opacity: 0; transform: translateY(30px) scale(0.9); }
+//           to { opacity: 1; transform: translateY(0) scale(1); }
+//         }
+
+//         /* Hover Wiggle */
+//         .hover-wiggle:hover .icon-target {
+//           animation: wiggle 0.5s ease-in-out;
+//         }
+
+//         @keyframes wiggle {
+//           0%, 100% { transform: rotate(0deg); }
+//           25% { transform: rotate(-10deg); }
+//           75% { transform: rotate(10deg); }
+//         }
+
+//         .action-card {
+//           background: white; border-radius: 30px; padding: 24px;
+//           box-shadow: 0 10px 25px rgba(0,0,0,0.04); border: 4px solid white;
+//           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+//         }
+//         .action-card:hover { transform: translateY(-12px) scale(1.02); border-color: #6C5CE733; }
+
+//         .book-card {
+//           background: white; border-radius: 25px; padding: 16px;
+//           box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 4px solid white;
+//           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+//         }
+//         .book-card:not(.locked):hover { transform: translateY(-8px) rotate(2deg); border-color: #6C5CE744; }
+
+//         .btn-primary {
+//           background: #6C5CE7; color: white; border: none; border-radius: 15px;
+//           font-weight: 900; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+//         }
+//         .btn-primary:hover { background: #5a4bc8; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(108, 92, 231, 0.4); }
+//       `}</style>
+
+//         <main className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+//           {/* --- Header Section --- */}
+//           <div className="mb-12 text-center md:text-left mt-6 fade-in-up" style={{ animationDelay: '0.1s' }}>
+//             <h1 className="text-3xl md:text-[44px] font-black text-slate-800 tracking-tight leading-tight">
+//               Welcome to <span className="text-[#6C5CE7] inline-block floating">DigiGyan</span> <br className="md:hidden" /> Book Publications 🚀
+//             </h1>
+//             <p className="text-[#636E72] font-bold text-lg mt-2">Let's make learning awesome today!</p>
+//           </div>
+
+//           {/* --- Quick Actions Section --- */}
+//           {isLoggedIn && (
+//             <section className="mb-16">
+//               <h2 className="text-xs font-black text-[#6C5CE7] uppercase tracking-[0.2em] mb-6 px-2 fade-in-up" style={{ animationDelay: '0.2s' }}>Quick Tools 🛠️</h2>
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+//                 <div className="action-card group cursor-pointer hover-wiggle fade-in-up" style={{ animationDelay: '0.3s' }}>
+//                   <div className="w-16 h-16 bg-blue-100 text-[#4D96FF] rounded-[22px] flex items-center justify-center mb-5 group-hover:bg-[#4D96FF] group-hover:text-white transition-colors duration-300 icon-target">
+//                     <ScanLine size={32} />
+//                   </div>
+//                   <h3 className="text-2xl font-black text-slate-800">Scan Option</h3>
+//                   <p className="text-[#636E72] font-bold text-sm mt-2">Quickly scan book covers or QR codes.</p>
+//                 </div>
+
+//                 <Link href="/category" className="action-card group no-underline hover-wiggle fade-in-up" style={{ animationDelay: '0.4s' }}>
+//                   <div className="w-16 h-16 bg-emerald-100 text-[#2DD4BF] rounded-[22px] flex items-center justify-center mb-5 group-hover:bg-[#2DD4BF] group-hover:text-white transition-colors duration-300 icon-target">
+//                     <FileEdit size={32} />
+//                   </div>
+//                   <h3 className="text-2xl font-black text-slate-800">Manual Entry</h3>
+//                   <p className="text-[#636E72] font-bold text-sm mt-2">Input publication data and metadata.</p>
+//                 </Link>
+
+//                 <div className="action-card group cursor-pointer hover-wiggle fade-in-up" style={{ animationDelay: '0.5s' }}>
+//                   <div className="w-16 h-16 bg-purple-100 text-[#C084FC] rounded-[22px] flex items-center justify-center mb-5 group-hover:bg-[#C084FC] group-hover:text-white transition-colors duration-300 icon-target">
+//                     <FileText size={32} />
+//                   </div>
+//                   <h3 className="text-2xl font-black text-slate-800">Test Generator</h3>
+//                   <p className="text-[#636E72] font-bold text-sm mt-2">Generate automated test papers.</p>
+//                 </div>
+//               </div>
+//             </section>
+//           )}
+
+//           {/* --- Books Section --- */}
+//           <section className="mb-16">
+//             <div className="flex items-center justify-between mb-8 fade-in-up" style={{ animationDelay: '0.6s' }}>
+//               <h2 className="text-xs font-black text-[#6C5CE7] uppercase tracking-[0.2em] px-2">
+//                 {series && Class ? `Library: ${series} — ${Class}` : 'Explore Bookshelf'} 📚
+//               </h2>
+//             </div>
+
+//             {loadingBooks ? (
+//               <div className="flex flex-col items-center justify-center p-20 bg-white rounded-[40px] shadow-sm border-4 border-white fade-in-up">
+//                 <Loader2 className="animate-spin text-[#6C5CE7] mb-4" size={48} />
+//                 <p className="font-black text-[#6C5CE7] animate-pulse">Magical things are loading...</p>
+//               </div>
+//             ) : books.length > 0 ? (
+//               <>
+//                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+//                   {(isLoggedIn ? books : books.slice(0, 6)).map((book, index, arr) => {
+//                     const lockedThreshold = Math.min(4, arr.length - 1);
+//                     const isLocked = !isLoggedIn && index >= lockedThreshold;
+
+//                     return (
+//                       <div
+//                         key={book.PR_ID}
+//                         className={`book-card flex flex-col fade-in-up ${isLocked ? 'locked' : ''}`}
+//                         style={{ animationDelay: `${0.2 + (index * 0.1)}s` }}
+//                       >
+//                         <div className="w-full aspect-[3/4] bg-[#F8FAFF] rounded-[20px] mb-4 overflow-hidden relative border-2 border-[#F0F4FF]">
+//                           {isLocked ? (
+//                             <div className="absolute inset-0 bg-[#2D3436]/90 backdrop-blur-sm flex flex-col items-center justify-center z-10 text-white p-4">
+//                               <Lock size={40} className="mb-2 text-[#FFD93D] floating" />
+//                               <span className="text-[10px] font-black uppercase tracking-widest text-center">Unlock Premium</span>
+//                             </div>
+//                           ) : book.PR_URL ? (
+//                             <img
+//                               src={book.PR_URL}
+//                               alt={book.PR_NAME}
+//                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+//                             />
+//                           ) : (
+//                             <div className="w-full h-full flex items-center justify-center text-5xl bg-[#E0DAFF]">📖</div>
+//                           )}
+//                         </div>
+
+//                         <h3 className="text-sm font-black text-slate-800 line-clamp-2 px-1 mb-2 min-h-[40px]">{book.PR_NAME}</h3>
+
+//                         {!isLocked ? (
+//                           <Link
+//                             href={`/subjects/book?bookid=${book.PR_ID}`}
+//                             className="btn-primary w-full py-2.5 text-xs no-underline mt-auto"
+//                           >
+//                             <BookOpen size={14} /> Open Book
+//                           </Link>
+//                         ) : (
+//                           <div className="w-full py-2.5 bg-slate-100 rounded-2xl text-[10px] font-black text-slate-400 text-center uppercase mt-auto">
+//                             Locked
+//                           </div>
+//                         )}
+//                       </div>
+//                     );
+//                   })}
+//                 </div>
+
+//                 {!isLoggedIn && (
+//                   <div className="mt-16 bg-[#6C5CE7] p-10 rounded-[40px] shadow-2xl text-center max-w-3xl mx-auto relative overflow-hidden fade-in-up" style={{ animationDelay: '0.8s' }}>
+//                     <div className="absolute top-[-20px] right-[-20px] text-9xl opacity-10 rotate-12 floating">📚</div>
+//                     <div className="relative z-10 flex flex-col items-center">
+//                       <div className="w-20 h-20 bg-[#FFD93D] rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-lg floating">🎁</div>
+//                       <h3 className="text-3xl font-black text-white mb-4 tracking-tight">Unlock the Full Library!</h3>
+//                       <p className="text-[#E0DAFF] font-bold mb-8 text-lg max-w-lg">
+//                         Sign in to access over 100+ interactive books, assignments, and the AI test generator.
+//                       </p>
+//                       <Link href="/login" className="bg-white text-[#6C5CE7] hover:bg-[#F0F4FF] font-black tracking-wide py-4 px-12 rounded-full shadow-xl transition-all hover:scale-110 flex items-center gap-3 text-lg no-underline active:scale-95">
+//                         <Lock size={20} />
+//                         Login Now
+//                       </Link>
+//                     </div>
+//                   </div>
+//                 )}
+//               </>
+//             ) : (
+//               <div className="bg-white border-4 border-dashed border-[#E0DAFF] rounded-[40px] h-72 flex flex-col items-center justify-center p-6 fade-in-up">
+//                 <span className="text-7xl mb-4 floating">🧭</span>
+//                 <p className="text-slate-400 font-black text-xl">No books found here yet!</p>
+//               </div>
+//             )}
+//           </section>
+
+//           {/* --- Recent Scans Section --- */}
+//           {isLoggedIn && (
+//             <section className="mb-20 fade-in-up" style={{ animationDelay: '0.9s' }}>
+//               <h2 className="text-xs font-black text-[#6C5CE7] uppercase tracking-[0.2em] mb-6 px-2">Recent Scans 📸</h2>
+//               <div className="bg-white border-4 border-dashed border-[#F0F4FF] rounded-[35px] h-48 flex flex-col items-center justify-center group overflow-hidden">
+//                 <div className="bg-[#F8FAFF] p-4 rounded-full mb-2 group-hover:scale-125 transition-transform duration-500">
+//                   <ScanLine size={32} className="text-slate-300" />
+//                 </div>
+//                 <span className="text-slate-400 font-black italic tracking-widest text-sm uppercase animate-pulse">Coming Soon</span>
+//               </div>
+//             </section>
+//           )}
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default UserPanel;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Settings,
-  LogOut,
-  User,
-  ScanLine,
-  FileEdit,
-  FileText,
-  ChevronDown,
-  Loader2,
-  BookOpen,
-  Lock
+  ScanLine, FileEdit, FileText, Loader2, BookOpen, Lock,
+  Sparkles, Star, Rocket, Ghost, Cloud, Sun
 } from 'lucide-react';
 import Link from 'next/link';
-import DigiGyanTopNav from './panel';
 import DigiGyanNav from '@/components/Navbar';
 import { useApp } from '@/context/AppContext';
 
+// --- Bouncing Background Object Component ---
+const FloatingBlob = ({ color, size, duration, delay, x, y }) => (
+  <motion.div
+    initial={{ x, y }}
+    animate={{
+      x: [x, x + 100, x - 50, x],
+      y: [y, y - 100, y + 50, y],
+      scale: [1, 1.2, 0.9, 1],
+      rotate: [0, 90, 180, 360],
+    }}
+    transition={{
+      duration,
+      repeat: Infinity,
+      delay,
+      ease: "linear"
+    }}
+    style={{
+      position: 'absolute',
+      width: size,
+      height: size,
+      backgroundColor: color,
+      filter: 'blur(60px)',
+      borderRadius: '50%',
+      opacity: 0.4,
+      zIndex: 0,
+    }}
+  />
+);
+
 const UserPanel = () => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { config, seriesId, classId, series, Class, isLoggedIn } = useApp();
   const [books, setBooks] = useState([]);
   const [loadingBooks, setLoadingBooks] = useState(false);
+  const [isMounted, setIsMounted] = useState(false); // FIXED: Hydration Guard
 
   const { PR_APP_KEY, PR_TOKEN } = config;
 
+  // Set mounted state to true after initial render
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const containerVars = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.3 }
+    }
+  };
+
+  const itemVars = {
+    hidden: { y: 50, opacity: 0, scale: 0.5 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      transition: { type: "spring", stiffness: 300, damping: 15 }
+    }
+  };
+
   useEffect(() => {
     const fetchBooks = async () => {
-      if (!seriesId || !classId) {
-        setBooks([]);
-        return;
-      }
-
+      if (!seriesId || !classId) return;
       setLoadingBooks(true);
       try {
         const response = await fetch('https://apis.tlmate.com/content-api/books-list', {
@@ -257,162 +581,214 @@ const UserPanel = () => {
           })
         });
         const result = await response.json();
-        if (result.STATUS === "SUCCESS") {
-          setBooks(result.DATA || []);
-        } else {
-          setBooks([]);
-        }
-      } catch (error) {
-        console.error("Error fetching books:", error);
-      } finally {
-        setLoadingBooks(false);
-      }
+        if (result.STATUS === "SUCCESS") setBooks(result.DATA || []);
+      } catch (error) { console.error(error); } finally { setLoadingBooks(false); }
     };
-
     fetchBooks();
   }, [seriesId, classId, PR_APP_KEY, PR_TOKEN]);
 
   return (
-    <div className="min-h-screen bg-[#F0F4FF] flex flex-col font-sans text-slate-800">
-      {/* --- Top Navigation Header --- */}
+    <div className="min-h-screen relative overflow-hidden font-['Nunito',_sans-serif] bg-[#F0F4FF]">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        .bg-animated {
+          background: linear-gradient(-45deg, #f0f4ff, #e0daff, #ffeaa7, #fab1a0);
+          background-size: 400% 400%;
+          animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
+
+      {/* --- CRAZY BACKGROUND LAYER --- */}
+      {/* We only render the moving objects on the client to avoid hydration errors */}
+      <div className="fixed inset-0 bg-animated -z-10">
+        {isMounted && (
+          <>
+            <FloatingBlob color="#6C5CE7" size={400} duration={20} delay={0} x={-100} y={-100} />
+            <FloatingBlob color="#FF7675" size={300} duration={25} delay={2} x={800} y={200} />
+            <FloatingBlob color="#55EFC4" size={350} duration={18} delay={5} x={200} y={600} />
+            <FloatingBlob color="#FFEAA7" size={250} duration={22} delay={1} x={600} y={-50} />
+
+            <motion.div
+              animate={{ x: [-200, 1600] }}
+              transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+              className="absolute top-20 opacity-30 text-white"
+            >
+              <Cloud size={100} fill="currentColor" />
+            </motion.div>
+
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], rotate: 360 }}
+              transition={{ duration: 15, repeat: Infinity }}
+              className="absolute top-10 right-20 opacity-20 text-yellow-500"
+            >
+              <Sun size={120} fill="currentColor" />
+            </motion.div>
+          </>
+        )}
+      </div>
+
       <DigiGyanNav />
 
-      <main className="p-4 md:p-8 max-w-6xl mx-auto w-full">
-        <div className="mb-10 text-center md:text-left mt-6 animate-in fade-in slide-in-from-top-4 duration-500">
-          <h1 className="text-3xl md:text-[40px] font-black text-slate-800 tracking-tight leading-tight">
-            Welcome to <span className="text-[#6C5CE7]">DigiGyan</span> Book Publications 🚀
+      <main className="p-4 md:p-8 max-w-7xl mx-auto w-full relative z-10">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="mb-12 text-center md:text-left mt-6 backdrop-blur-md bg-white/30 p-8 rounded-[50px] border border-white/50 shadow-2xl"
+        >
+          <h1 className="text-4xl md:text-[64px] font-black text-slate-800 tracking-tight leading-tight">
+            Hi! Welcome to <br />
+            <motion.span
+              animate={{
+                color: ['#6C5CE7', '#E84393', '#00B894', '#6C5CE7'],
+                scale: [1, 1.02, 1]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="inline-block"
+            >
+              DigiGyan World!
+            </motion.span>
+            <motion.span
+              animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="inline-block ml-4"
+            >
+              🌈
+            </motion.span>
           </h1>
-        </div>
+          <p className="text-slate-700 font-black text-xl mt-4 bg-yellow-300 inline-block px-6 py-2 rounded-full shadow-lg">
+            Let's find your magic book! ✨
+          </p>
+        </motion.div>
 
-        {/* --- Quick Actions Section --- */}
         {isLoggedIn && (
-          <section className="mb-12">
-            <h2 className="text-sm font-black text-[#636E72] uppercase tracking-wider mb-6 px-2">Tools & Actions 🛠️</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-              {/* Scan Option */}
-              <div className="group cursor-pointer bg-white p-6 rounded-[30px] border-4 border-white shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-blue-100 hover:-translate-y-2 hover:rotate-1 transition-all duration-300">
-                <div className="w-14 h-14 bg-blue-100/50 text-[#4D96FF] rounded-[20px] flex items-center justify-center mb-4 group-hover:bg-[#4D96FF] group-hover:text-white transition-colors duration-300 shadow-sm">
-                  <ScanLine size={28} />
-                </div>
-                <h3 className="text-xl font-black text-slate-800">Scan Option</h3>
-                <p className="text-[#636E72] font-semibold text-sm mt-1.5">Quickly scan book covers or QR codes.</p>
-              </div>
-
-              {/* Manual Option */}
-              <Link href="/category" className="group cursor-pointer bg-white p-6 rounded-[30px] border-4 border-white shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-emerald-100 hover:-translate-y-2 hover:-rotate-1 transition-all duration-300">
-                <div className="w-14 h-14 bg-emerald-100/50 text-[#2DD4BF] rounded-[20px] flex items-center justify-center mb-4 group-hover:bg-[#2DD4BF] group-hover:text-white transition-colors duration-300 shadow-sm">
-                  <FileEdit size={28} />
-                </div>
-                <h3 className="text-xl font-black text-slate-800">Manual Entry</h3>
-                <p className="text-[#636E72] font-semibold text-sm mt-1.5">Manually input publication data and metadata.</p>
+          <motion.section
+            variants={containerVars}
+            initial="hidden"
+            animate="visible"
+            className="mb-20"
+          >
+            <h2 className="text-xs font-black text-[#6C5CE7] uppercase tracking-[0.5em] mb-8 px-4">Magic Toolbar 🎨</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <ActionCard icon={<ScanLine size={40} />} title="Magic Scan" color="bg-[#4834D4]" delay={0.1} />
+              <Link href="/category" className="no-underline">
+                <ActionCard icon={<FileEdit size={40} />} title="Pencil Box" color="bg-[#00B894]" delay={0.2} />
               </Link>
-
-              {/* TG Option */}
-              <div className="group cursor-pointer bg-white p-6 rounded-[30px] border-4 border-white shadow-[0_10px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-purple-100 hover:-translate-y-2 hover:rotate-1 transition-all duration-300">
-                <div className="w-14 h-14 bg-purple-100/50 text-[#C084FC] rounded-[20px] flex items-center justify-center mb-4 group-hover:bg-[#C084FC] group-hover:text-white transition-colors duration-300 shadow-sm">
-                  <FileText size={28} />
-                </div>
-                <h3 className="text-xl font-black text-slate-800">Test Generator</h3>
-                <p className="text-[#636E72] font-semibold text-sm mt-1.5">Generate automated test papers for books.</p>
-              </div>
-
+              <ActionCard icon={<FileText size={40} />} title="Quiz Time" color="bg-[#E84393]" delay={0.3} />
             </div>
-          </section>
+          </motion.section>
         )}
 
-        {/* --- Books Section --- */}
-        <section className="mb-12 animate-in fade-in slide-in-from-bottom-6 duration-500">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-              Books {series && Class ? `for ${series} - ${Class}` : ''}
+        <section className="mb-20">
+          <div className="flex items-center gap-4 mb-8 px-4">
+            <div className="h-1 flex-1 bg-white/40 rounded-full" />
+            <h2 className="text-sm font-black text-slate-600 uppercase tracking-widest">
+              {series || 'The Magic Shelf'}
             </h2>
+            <div className="h-1 flex-1 bg-white/40 rounded-full" />
           </div>
 
           {loadingBooks ? (
-            <div className="flex justify-center p-16 bg-white rounded-[40px] shadow-[0_10px_30px_rgba(0,0,0,0.03)] border-4 border-white">
-              <Loader2 className="animate-spin text-[#6C5CE7]" size={40} />
+            <div className="flex flex-col items-center p-20">
+              <Loader2 className="text-[#6C5CE7] animate-spin" size={80} />
+              <p className="font-black text-2xl text-[#6C5CE7] mt-6">Summoning Books...</p>
             </div>
-          ) : books.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 xl:gap-8">
-                {(isLoggedIn ? books : books.slice(0, 6)).map((book, index, arr) => {
-                  const lockedThreshold = Math.min(4, arr.length - 1);
-                  const isLocked = !isLoggedIn && index >= lockedThreshold;
+          ) : (
+            <motion.div
+              variants={containerVars}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8"
+            >
+              {books.length > 0 ? (
+                (isLoggedIn ? books : books.slice(0, 6)).map((book, idx) => {
+                  const isLocked = !isLoggedIn && idx >= 4;
                   return (
-                    <div key={book.PR_BOOK_ID || book.PR_NAME} className={`bg-white rounded-[30px] p-4 md:p-5 shadow-[0_10px_25px_rgba(0,0,0,0.05)] border-4 border-white flex flex-col group ${isLocked ? 'relative overflow-hidden opacity-95 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-2 hover:rotate-1 hover:border-[#6C5CE7]/20 transition-all duration-300'}`}>
-                      <div className="w-full aspect-[3/4] bg-[#F0F4FF] rounded-[20px] flex items-center justify-center mb-4 overflow-hidden relative border-2 border-transparent">
+                    <motion.div
+                      key={book.PR_ID}
+                      variants={itemVars}
+                      whileHover={{ scale: 1.05, rotate: idx % 2 === 0 ? 2 : -2 }}
+                      className="relative bg-white rounded-[45px] p-5 shadow-[0_15px_0_0_#E0DAFF] border-4 border-white flex flex-col group"
+                    >
+                      <div className="w-full aspect-[3/4] bg-[#F0F4FF] rounded-[35px] mb-4 overflow-hidden relative border-4 border-[#F0F4FF]">
                         {isLocked ? (
-                          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center z-10 text-white p-4">
-                            <Lock size={48} className="mb-3 text-[#E0DAFF] drop-shadow-lg" />
-                            <span className="text-xs font-black uppercase tracking-widest text-[#E0DAFF]">Locked</span>
+                          <div className="absolute inset-0 bg-slate-900/80 flex flex-col items-center justify-center text-white p-4">
+                            <Lock size={40} className="text-yellow-400 mb-2" />
+                            <span className="font-black text-[10px] tracking-widest uppercase">Secret!</span>
                           </div>
-                        ) : book.PR_URL ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={book.PR_URL} alt={book.PR_NAME} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <div className="text-6xl animate-pulse opacity-50">📖</div>
+                          <img src={book.PR_URL || "/placeholder.png"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         )}
-                        {!isLocked && <div className="absolute inset-0 bg-gradient-to-t from-[#6C5CE7]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>}
                       </div>
-                                <h3 className="text-base font-black text-slate-800 line-clamp-2 px-1 mb-1 leading-tight">{book.PR_NAME}</h3>
-                                {!isLocked && (
-                                    <div className="flex items-center justify-between px-1 mb-3 mt-1 text-xs">
-                                        <span className="font-bold text-[#636E72] line-clamp-1">{book.PR_PUBLISHER || 'DigiGyan'}</span>
-                                    </div>
-                                )}
-                                
-                                {!isLocked && (
-                                     <div className="w-full mt-auto pt-2">
-                                         <Link href={`/subjects/book?bookid=${book.PR_ID}`} className="w-full py-3 bg-[#6C5CE7] tracking-wide text-white rounded-2xl text-xs font-black hover:bg-[#5a4bc8] hover:shadow-lg hover:shadow-[#6C5CE7]/30 transition-all flex items-center justify-center gap-2 transform active:scale-95">
-                                             <BookOpen size={16} />
-                                             Open
-                                         </Link>
-                                     </div>
-                                )}
-                    </div>
+                      <h3 className="text-base font-black text-slate-800 line-clamp-2 mb-4 leading-tight min-h-[48px] px-1">{book.PR_NAME}</h3>
+                      {!isLocked ? (
+                        <Link href={`/subjects/book?bookid=${book.PR_ID}`} className="no-underline mt-auto">
+                          <motion.button
+                            whileTap={{ scale: 0.8 }}
+                            className="w-full py-4 bg-[#6C5CE7] text-white rounded-[25px] font-black shadow-[0_6px_0_0_#4834D4] active:shadow-none active:translate-y-2 transition-all"
+                          >
+                            READ! 📖
+                          </motion.button>
+                        </Link>
+                      ) : (
+                        <div className="w-full py-4 bg-slate-100 rounded-[25px] text-slate-300 font-black text-center mt-auto">LOCKED</div>
+                      )}
+                    </motion.div>
                   );
-                })}
-              </div>
-              {!isLoggedIn && (
-                <div className="mt-16 bg-white/60 p-10 rounded-[40px] border-4 border-white shadow-[0_10px_30px_rgba(0,0,0,0.03)] text-center max-w-2xl mx-auto flex flex-col items-center backdrop-blur-sm">
-                  <div className="w-16 h-16 bg-[#FFEAA7] text-[#D6A317] rounded-[20px] flex items-center justify-center text-4xl mb-6 shadow-sm hover:rotate-12 transition-transform cursor-pointer">🎁</div>
-                  <h3 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">Unlock Your Full Potential</h3>
-                  <p className="text-[#636E72] font-bold mb-8 text-lg leading-relaxed">
-                    Sign in to get unlimited access to our entire library of premium educational resources, interactive tools, and assignments.
-                  </p>
-                  <Link href="/login" className="bg-[#6C5CE7] text-white hover:bg-[#5a4bc8] font-black tracking-wide py-4 px-12 rounded-full shadow-[0_10px_20px_rgba(108,92,231,0.3)] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 text-lg">
-                    <Lock size={20} />
-                    Login to unlock all other books
-                  </Link>
+                })
+              ) : (
+                <div className="col-span-full py-20 text-center">
+                  <Ghost size={60} className="mx-auto text-slate-300 mb-4" />
+                  <p className="font-black text-slate-400">No books found in this dimension.</p>
                 </div>
               )}
-            </>
-          ) : (
-            <div className="bg-white border-4 border-dashed border-[#E0DAFF] rounded-[40px] h-64 flex flex-col items-center justify-center p-6 shadow-sm">
-              <span className="text-6xl mb-4 opacity-75">🧭</span>
-              <p className="text-slate-500 font-black text-xl">No books found in this section.</p>
-            </div>
+            </motion.div>
           )}
         </section>
 
-        {/* --- Recent Scans Section --- */}
-        {isLoggedIn && (
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Recent Scans</h2>
+        {!isLoggedIn && (
+          <motion.div
+            initial={{ scale: 0.9, y: 50 }}
+            whileInView={{ scale: 1, y: 0 }}
+            className="mt-32 p-12 rounded-[70px] bg-[#6C5CE7] text-white text-center shadow-2xl relative overflow-hidden"
+          >
+            <div className="relative z-10 flex flex-col items-center">
+              <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="text-7xl mb-6">🛸</motion.div>
+              <h3 className="text-4xl md:text-5xl font-black mb-6">Wanna see more <br /> magic?</h3>
+              <Link href="/login" className="no-underline">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  className="bg-[#FFEAA7] text-[#6C5CE7] px-12 py-5 rounded-[30px] font-black text-2xl shadow-[0_10px_0_0_#F9CA24]"
+                >
+                  SIGN IN! 🚀
+                </motion.button>
+              </Link>
             </div>
-            <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl h-64 flex flex-col items-center justify-center">
-              <div className="bg-slate-100 p-4 rounded-full mb-3">
-                <ScanLine size={32} className="text-slate-400" />
-              </div>
-              <span className="text-slate-400 font-medium italic text-lg tracking-wide">Coming Soon</span>
-            </div>
-          </section>
+          </motion.div>
         )}
       </main>
     </div>
   );
 };
+
+const ActionCard = ({ icon, title, color, delay }) => (
+  <motion.div
+    variants={{ hidden: { y: 30, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+    whileHover={{ scale: 1.05, y: -5 }}
+    className="bg-white p-8 rounded-[50px] shadow-[0_15px_0_0_#E0DAFF] border-4 border-white flex flex-col items-center group cursor-pointer"
+  >
+    <div className={`w-20 h-20 ${color} text-white rounded-[30px] flex items-center justify-center mb-4 shadow-xl group-hover:rotate-12 transition-transform`}>
+      {icon}
+    </div>
+    <span className="font-black text-2xl text-slate-800">{title}</span>
+  </motion.div>
+);
 
 export default UserPanel;
