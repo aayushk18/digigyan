@@ -678,7 +678,7 @@ const UserPanel = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <ActionCard icon={<ScanLine size={40} />} title="Magic Scan" color="bg-[#4834D4]" delay={0.1} />
               <Link href="/category" className="no-underline">
-                <ActionCard icon={<FileEdit size={40} />} title="Pencil Box" color="bg-[#00B894]" delay={0.2} />
+                <ActionCard icon={<FileEdit size={40} />} title="Manual Select" color="bg-[#00B894]" delay={0.2} />
               </Link>
               <ActionCard icon={<FileText size={40} />} title="Quiz Time" color="bg-[#E84393]" delay={0.3} />
             </div>
@@ -717,29 +717,57 @@ const UserPanel = () => {
                       whileHover={{ scale: 1.05, rotate: idx % 2 === 0 ? 2 : -2 }}
                       className="relative bg-white rounded-[45px] p-5 shadow-[0_15px_0_0_#E0DAFF] border-4 border-white flex flex-col group"
                     >
+                      {/* --- Book Image --- */}
                       <div className="w-full aspect-[3/4] bg-[#F0F4FF] rounded-[35px] mb-4 overflow-hidden relative border-4 border-[#F0F4FF]">
                         {isLocked ? (
                           <div className="absolute inset-0 bg-slate-900/80 flex flex-col items-center justify-center text-white p-4">
-                            <Lock size={40} className="text-yellow-400 mb-2" />
-                            <span className="font-black text-[10px] tracking-widest uppercase">Secret!</span>
+                            <Lock size={40} className="text-yellow-400 mb-2 floating" />
+                            <span className="font-black text-[10px] tracking-widest uppercase text-yellow-400">Locked!</span>
                           </div>
                         ) : (
-                          <img src={book.PR_URL || "/placeholder.png"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          <img
+                            src={book.PR_URL || "/placeholder.png"}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            alt="cover"
+                          />
                         )}
                       </div>
-                      <h3 className="text-base font-black text-slate-800 line-clamp-2 mb-4 leading-tight min-h-[48px] px-1">{book.PR_NAME}</h3>
-                      {!isLocked ? (
-                        <Link href={`/subjects/book?bookid=${book.PR_ID}`} className="no-underline mt-auto">
-                          <motion.button
-                            whileTap={{ scale: 0.8 }}
-                            className="w-full py-4 bg-[#6C5CE7] text-white rounded-[25px] font-black shadow-[0_6px_0_0_#4834D4] active:shadow-none active:translate-y-2 transition-all"
-                          >
-                            READ! 📖
-                          </motion.button>
-                        </Link>
-                      ) : (
-                        <div className="w-full py-4 bg-slate-100 rounded-[25px] text-slate-300 font-black text-center mt-auto">LOCKED</div>
-                      )}
+
+                      {/* --- Book Title --- */}
+                      <h3 className="text-base font-black text-slate-800 line-clamp-2 mb-4 leading-tight min-h-[48px] px-1 uppercase tracking-tight">
+                        {book.PR_NAME}
+                      </h3>
+
+                      {/* --- Action Buttons --- */}
+                      <div className="flex flex-col gap-3 mt-auto">
+                        {!isLocked ? (
+                          <>
+                            {/* Option 1: Read (Purple) */}
+                            <Link href={`/subjects/book?bookid=${book.PR_ID}`} className="no-underline">
+                              <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                className="w-full py-3 bg-[#6C5CE7] text-white rounded-[20px] font-black text-xs shadow-[0_5px_0_0_#4834D4] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                              >
+                                READ! 📖
+                              </motion.button>
+                            </Link>
+
+                            {/* Option 2: Download (Emerald) */}
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => window.open(book.PR_EBOOK_URL, '_blank')}
+                              className="w-full py-3 bg-[#00B894] text-white rounded-[20px] font-black text-xs shadow-[0_5px_0_0_#009475] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                            >
+                              SAVE 📥
+                            </motion.button>
+                          </>
+                        ) : (
+                          /* Locked State */
+                          <div className="w-full py-6 bg-slate-100 rounded-[25px] text-slate-300 font-black text-xs text-center uppercase tracking-widest border-2 border-dashed border-slate-200">
+                            No Access 🛑
+                          </div>
+                        )}
+                      </div>
                     </motion.div>
                   );
                 })
