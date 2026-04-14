@@ -69,47 +69,83 @@ const BookDetail = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
+        <div style={{ fontFamily: "'Nunito', sans-serif", minHeight: "100vh", background: "#F0F4FF" }}>
+            <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+    
+    .detail-card { 
+      background: white; border-radius: 45px; overflow: hidden;
+      box-shadow: 0 20px 40px rgba(108, 92, 231, 0.1); 
+      border: 6px solid white; display: flex; flex-direction: column;
+    }
+
+    @media (min-width: 768px) { .detail-card { flex-direction: row; } }
+
+    .book-aside {
+      background: #F8F9FF; padding: 40px; border-radius: 40px;
+      margin: 15px; display: flex; flex-direction: column; align-items: center;
+      text-align: center; border: 2px solid #E0DAFF;
+    }
+
+    .resource-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 30px 20px; border-radius: 30px; border: none; cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-weight: 900;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.05); position: relative;
+    }
+
+    .resource-btn:not(:disabled):hover { 
+      transform: translateY(-8px) scale(1.02); 
+      box-shadow: 0 15px 25px rgba(108, 92, 231, 0.2);
+    }
+
+    .resource-btn:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+
+    .floating { animation: floating 3s ease-in-out infinite; }
+    @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  `}</style>
+
+            {/* STICKY HEADER */}
+            <div style={{ background: "#6C5CE7", padding: "15px 30px", display: "flex", alignItems: "center", gap: "20px", position: "sticky", top: 0, zIndex: 100 }}>
                 <button
                     onClick={() => router.back()}
-                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                    style={{ background: "rgba(255,255,255,0.2)", border: "none", width: 45, height: 45, borderRadius: "15px", cursor: "pointer", color: "white", fontSize: 20 }}
                 >
-                    <ArrowLeft size={20} className="text-slate-600" />
+                    ⬅️
                 </button>
-                <h1 className="text-xl font-bold text-slate-800 truncate">Book Details</h1>
+                <h1 style={{ color: "white", fontSize: 22, fontWeight: 900, margin: 0 }}>Book Details 📔</h1>
             </div>
 
-            <main className="max-w-4xl mx-auto p-6 lg:p-10">
-                <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/60 overflow-hidden border border-slate-100 flex flex-col md:flex-row">
+            <main style={{ maxWidth: "1000px", margin: "0 auto", padding: "40px 20px" }}>
+                <div className="detail-card">
 
-                    {/* Left: Book Cover & Info */}
-                    <div className="w-full md:w-2/5 bg-slate-100 p-8 flex flex-col items-center text-center">
-                        <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl mb-6">
+                    {/* LEFT: BOOK INFO */}
+                    <div className="book-aside" style={{ flex: "0 0 350px" }}>
+                        <div style={{ width: "100%", borderRadius: "25px", overflow: "hidden", boxShadow: "0 15px 30px rgba(0,0,0,0.1)", marginBottom: 25 }}>
                             <img
                                 src={bookData.PR_ICON}
                                 alt={bookData.PR_NAME}
-                                className="w-full h-full object-cover"
+                                style={{ width: "100%", display: "block", objectFit: "cover" }}
                             />
                         </div>
-                        <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase tracking-widest mb-2">
+
+                        <span style={{ background: "#FFD93D", color: "#2D3436", padding: "5px 15px", borderRadius: "50px", fontSize: 12, fontWeight: 900, marginBottom: 10 }}>
                             {bookData.PR_CLASS?.PR_NAME}
                         </span>
-                        <h2 className="text-lg font-black text-slate-800 leading-tight">
+                        <h2 style={{ fontSize: 24, fontWeight: 900, color: "#2D3436", margin: "0 0 5px 0", lineHeight: 1.2 }}>
                             {bookData.PR_NAME}
                         </h2>
-                        <p className="text-slate-500 text-sm mt-1">{bookData.PR_CATEGORY?.PR_NAME}</p>
+                        <p style={{ color: "#6C5CE7", fontWeight: 700, margin: 0 }}>{bookData.PR_CATEGORY?.PR_NAME}</p>
                     </div>
 
-                    {/* Right: Actions */}
-                    <div className="w-full md:w-3/5 p-8 lg:p-12 flex flex-col justify-center">
-                        <div className="mb-8">
-                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Learning Resources</h3>
-                            <p className="text-slate-500 text-sm">Select an option below to start teaching or learning.</p>
+                    {/* RIGHT: ACTIONS */}
+                    <div style={{ flex: 1, padding: "40px" }}>
+                        <div style={{ marginBottom: 35 }}>
+                            <h3 style={{ fontSize: 28, fontWeight: 900, color: "#2D3436", margin: "0 0 10px 0" }}>Learning Resources ✨</h3>
+                            <p style={{ color: "#636E72", fontWeight: 700 }}>Choose your adventure and start learning!</p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "20px" }}>
                             {actionButtons.map((btn) => (
                                 <button
                                     key={btn.id}
@@ -119,30 +155,36 @@ const BookDetail = () => {
                                         if (btn.url.startsWith('/')) router.push(btn.url);
                                         else window.open(btn.url, '_blank');
                                     }}
-                                    className={`flex flex-col items-center justify-center p-6 rounded-3xl transition-all duration-300 group relative border border-transparent 
-                    ${btn.url ? `${btn.color} hover:text-white hover:scale-[1.02] shadow-sm hover:shadow-lg` : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-60'}
-                  `}
+                                    className="resource-btn"
+                                    style={{
+                                        background: btn.url ? "white" : "#F1F2F6",
+                                        border: btn.url ? `3px solid ${btn.color || '#E0DAFF'}` : "3px solid #E0DAFF",
+                                        color: "#2D3436"
+                                    }}
                                 >
-                                    <div className="mb-3 transition-transform group-hover:scale-110">
-                                        {btn.icon}
+                                    <div style={{ fontSize: 40, marginBottom: 12 }} className={btn.url ? "floating" : ""}>
+                                        {btn.icon || '📖'}
                                     </div>
-                                    <span className="font-bold text-sm">{btn.label}</span>
+                                    <span style={{ fontSize: 14 }}>{btn.label}</span>
+
                                     {!btn.url && (
-                                        <span className="absolute top-2 right-2 text-[8px] font-bold bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded">
-                                            N/A
+                                        <span style={{ position: "absolute", top: 10, right: 10, fontSize: 10, background: "#E0DAFF", padding: "2px 8px", borderRadius: "8px", fontWeight: 900 }}>
+                                            SOON
                                         </span>
                                     )}
                                 </button>
                             ))}
                         </div>
 
-                        <div className="mt-8 flex items-start gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                            <Info size={18} className="text-amber-600 mt-0.5" />
-                            <p className="text-xs text-amber-800 leading-relaxed italic">
-                                Resources are updated periodically. If an option is grayed out, it means the content is currently being processed for this specific title.
+                        {/* INFO BOX */}
+                        <div style={{ marginTop: 40, padding: 25, background: "#FFF9E6", borderRadius: "30px", border: "3px dashed #FFD93D", display: "flex", gap: 15, alignItems: "start" }}>
+                            <span style={{ fontSize: 24 }}>💡</span>
+                            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#947600", lineHeight: 1.6 }}>
+                                Resources are updated regularly! If a button is grayed out, our team is busy adding magic to that section. Check back soon!
                             </p>
                         </div>
                     </div>
+
                 </div>
             </main>
         </div>

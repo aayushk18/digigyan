@@ -88,91 +88,142 @@ const ManualEntry = ({ onBack }) => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 p-6">
-            {/* Header */}
-            <div className="max-w-4xl mx-auto mb-8 flex items-center gap-4">
+        <div style={{ fontFamily: "'Nunito', sans-serif", minHeight: "100vh", background: "#F0F4FF", padding: "40px 20px" }}>
+            <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+    
+    .setup-card { 
+      background: white; border-radius: 35px; padding: 30px;
+      box-shadow: 0 15px 35px rgba(108, 92, 231, 0.08); 
+      border: 4px solid white; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .option-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 25px; border-radius: 20px; border: 2px solid #F0F4FF;
+      background: #F8F9FF; cursor: pointer; transition: all 0.2s ease;
+      font-weight: 800; color: #2D3436; margin-bottom: 12px;
+    }
+
+    .option-btn:hover { transform: translateX(8px); background: white; border-color: #6C5CE733; }
+    
+    .option-btn.selected { 
+      background: #6C5CE7; color: white; border-color: #6C5CE7;
+      box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .class-pill {
+      padding: 15px; border-radius: 20px; border: 2px solid #F0F4FF;
+      background: white; font-weight: 800; color: #6C5CE7; cursor: pointer;
+      text-align: center; transition: all 0.2s ease;
+    }
+
+    .class-pill:hover { transform: scale(1.05); border-color: #6C5CE7; }
+    .class-pill.selected { background: #FFD93D; color: #2D3436; border-color: #FFD93D; }
+
+    .step-badge {
+      width: 40px; height: 40px; border-radius: 12px; display: flex; 
+      align-items: center; justify-content: center; font-weight: 900; font-size: 18px;
+    }
+
+    .floating { animation: floating 3s ease-in-out infinite; }
+    @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  `}</style>
+
+            {/* HEADER */}
+            <div style={{ maxWidth: "1000px", margin: "0 auto 40px auto", display: "flex", alignItems: "center", gap: "20px" }}>
                 <button
                     onClick={onBack}
-                    className="p-2 hover:bg-white rounded-full border border-transparent hover:border-slate-200 transition-all"
+                    style={{ background: "white", border: "none", width: 50, height: 50, borderRadius: "18px", cursor: "pointer", fontSize: 20, boxShadow: "0 5px 15px rgba(0,0,0,0.05)" }}
                 >
-                    <ArrowLeft size={20} className="text-slate-600" />
+                    ⬅️
                 </button>
-                <h1 className="text-2xl font-bold text-slate-800">Manual Entry Setup</h1>
+                <div>
+                    <h1 style={{ fontSize: 32, fontWeight: 900, color: "#2D3436", margin: 0 }}>Manual Entry Setup 🛠️</h1>
+                    <p style={{ margin: 0, color: "#6C5CE7", fontWeight: 700 }}>Step by step, let's add some magic!</p>
+                </div>
             </div>
 
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div style={{ maxWidth: "1000px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px" }}>
 
-                {/* Step 1: Select Series (Category) */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold">1</div>
-                        <h2 className="font-semibold text-slate-700">Select Book Series</h2>
+                {/* STEP 1: SERIES */}
+                <div className="setup-card">
+                    <div style={{ display: "flex", alignItems: "center", gap: 15, marginBottom: 30 }}>
+                        <div className="step-badge" style={{ background: "#E0DAFF", color: "#6C5CE7" }}>1</div>
+                        <h2 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>Select Book Series</h2>
                     </div>
 
-                    <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div style={{ maxHeight: "450px", overflowY: "auto", paddingRight: "10px" }}>
                         {loadingCategories ? (
-                            <div className="flex flex-col items-center py-10 text-slate-400">
-                                <Loader2 className="animate-spin mb-2" />
-                                <p className="text-sm">Loading series...</p>
+                            <div style={{ textAlign: "center", padding: "40px", color: "#6C5CE7" }}>
+                                <div className="floating" style={{ fontSize: 40 }}>🌀</div>
+                                <p style={{ fontWeight: 800 }}>Loading series...</p>
                             </div>
                         ) : (
                             categories.map((cat) => (
                                 <button
                                     key={cat.PR_CATEGORY_ID}
                                     onClick={() => handleCategorySelect(cat)}
-                                    className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${selectedCategory?.PR_CATEGORY_ID === cat.PR_CATEGORY_ID
-                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                                        : 'border-slate-100 hover:border-indigo-200 text-slate-600 hover:bg-slate-50'
-                                        }`}
+                                    className={`option-btn ${selectedCategory?.PR_CATEGORY_ID === cat.PR_CATEGORY_ID ? 'selected' : ''}`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <BookOpen size={18} />
-                                        <span className="font-medium">{cat.PR_NAME}</span>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+                                        <span style={{ fontSize: 22 }}>📚</span>
+                                        <span>{cat.PR_NAME}</span>
                                     </div>
-                                    <ChevronRight size={16} className={selectedCategory?.PR_CATEGORY_ID === cat.PR_CATEGORY_ID ? 'opacity-100' : 'opacity-30'} />
+                                    <span>{selectedCategory?.PR_CATEGORY_ID === cat.PR_CATEGORY_ID ? '✅' : '✨'}</span>
                                 </button>
                             ))
                         )}
                     </div>
                 </div>
 
-                {/* Step 2: Select Class */}
-                <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all ${!selectedCategory ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center font-bold">2</div>
-                        <h2 className="font-semibold text-slate-700">Select Class</h2>
+                {/* STEP 2: CLASS */}
+                <div className="setup-card" style={{ opacity: !selectedCategory ? 0.6 : 1, pointerEvents: !selectedCategory ? 'none' : 'auto' }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 15, marginBottom: 30 }}>
+                        <div className="step-badge" style={{ background: "#FFF3C4", color: "#D6A317" }}>2</div>
+                        <h2 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>Select Class</h2>
                     </div>
 
                     {loadingClasses ? (
-                        <div className="flex flex-col items-center py-12 text-slate-400">
-                            <Loader2 className="animate-spin mb-2" />
-                            <p className="text-sm">Fetching classes...</p>
+                        <div style={{ textAlign: "center", padding: "40px", color: "#D6A317" }}>
+                            <div className="floating" style={{ fontSize: 40 }}>🚀</div>
+                            <p style={{ fontWeight: 800 }}>Fetching classes...</p>
                         </div>
                     ) : selectedCategory ? (
-                        <div className="grid grid-cols-2 gap-3">
-                            {classes.map((cls) => (
-                                <button
-                                    key={cls.PR_CLASS_ID}
-                                    onClick={() => setSelectedClass(cls)}
-                                    className={`p-3 rounded-xl border text-sm font-medium transition-all ${selectedClass?.PR_CLASS_ID === cls.PR_CLASS_ID
-                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                        : 'border-slate-100 hover:border-emerald-200 text-slate-600'
-                                        }`}
-                                >
-                                    {cls.PR_NAME}
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-12 text-slate-400 italic">
-                            Please select a series first
-                        </div>
-                    )}
+                        <>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "15px" }}>
+                                {classes.map((cls) => (
+                                    <button
+                                        key={cls.PR_CLASS_ID}
+                                        onClick={() => setSelectedClass(cls)}
+                                        className={`class-pill ${selectedClass?.PR_CLASS_ID === cls.PR_CLASS_ID ? 'selected' : ''}`}
+                                    >
+                                        {cls.PR_NAME}
+                                    </button>
+                                ))}
+                            </div>
 
-                    {selectedClass && (
-                        <button onClick={handleContinue} className="w-full mt-8 bg-slate-900 text-white py-3 rounded-xl font-semibold hover:bg-indigo-600 transition-colors shadow-lg shadow-indigo-100 animate-in fade-in slide-in-from-bottom-2">
-                            Continue with {selectedClass.PR_NAME}
-                        </button>
+                            {selectedClass && (
+                                <button
+                                    onClick={handleContinue}
+                                    style={{
+                                        width: "100%", marginTop: 40, background: "#6C5CE7", color: "white",
+                                        padding: "20px", borderRadius: "25px", fontSize: 18, fontWeight: 900,
+                                        border: "none", cursor: "pointer", boxShadow: "0 10px 25px rgba(108, 92, 231, 0.4)",
+                                        transition: "all 0.3s"
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.02)"}
+                                    onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
+                                >
+                                    Let's Go with {selectedClass.PR_NAME}! 🚀
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <div style={{ textAlign: "center", padding: "60px 20px", color: "#A29BFE", fontStyle: "italic", fontWeight: 700 }}>
+                            <div style={{ fontSize: 40, marginBottom: 10, opacity: 0.5 }}>☝️</div>
+                            Pick a series first!
+                        </div>
                     )}
                 </div>
 
