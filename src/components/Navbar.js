@@ -153,7 +153,7 @@ const DigiGyanNav = () => {
 
                         {/* --- Typography Container --- */}
                         <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white italic tracking-tighter drop-shadow-md">
+                            <span className="text-2xl font-black text-white italic tracking-tighter drop-shadow-md">
                                 DigiGyan
                             </span>
 
