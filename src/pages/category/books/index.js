@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useApp } from "@/context/AppContext";
-import { Loader2 } from "lucide-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, ChevronDown, FileText, ShieldCheck, Info, LogOut } from "lucide-react";
 
 const navItems = [
     { id: "books", label: "Flipbooks", emoji: "📚" },
@@ -11,16 +10,27 @@ const navItems = [
     { id: "tests", label: "Test", emoji: "📝" },
 ];
 
+// Helper Component for Dropdown Menu Items
+const MenuLink = ({ icon, label }) => (
+    <motion.button
+        whileHover={{ x: 10, backgroundColor: "#F0F4FF" }}
+        style={{
+            width: "100%", padding: "12px 20px", textAlign: "left", fontSize: 15,
+            fontWeight: 900, color: "#2D3436", background: "transparent",
+            borderRadius: "20px", display: "flex", alignItems: "center", gap: "12px",
+            cursor: "pointer", border: "2px solid transparent", outline: "none", transition: "border-color 0.2s"
+        }}
+    >
+        {icon} {label}
+    </motion.button>
+);
+
 export default function DigiGyanPanel() {
-
-
     const router = useRouter();
     const { categoryId } = router.query;
 
-
-
     const {
-        config, isLoggedIn, user,
+        config, isLoggedIn, user, logout,
         series, seriesId, setSeriesId,
         Class, setClass, classId, setClassId
     } = useApp();
@@ -34,11 +44,15 @@ export default function DigiGyanPanel() {
     const [filterSubject, setFilterSubject] = useState("All Subjects");
     const [search, setSearch] = useState("");
     const [selectedBook, setSelectedBook] = useState(null);
-
-    // Controls the Mobile Sidebar
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
 
-
+    // Dropdown Animation Variants
+    const dropdownVars = {
+        hidden: { opacity: 0, y: -20, scale: 0.9, transformOrigin: "top right" },
+        visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } },
+        exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.2 } }
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => setIsTimeout(true), 5000);
@@ -47,8 +61,6 @@ export default function DigiGyanPanel() {
 
     useEffect(() => {
         if (!router.isReady) return;
-
-        console.log("cat", categoryId);
 
         // If a categoryId is in the URL and differs from context, update it & wait for re-render
         if (categoryId && String(categoryId) !== String(seriesId)) {
@@ -219,7 +231,7 @@ export default function DigiGyanPanel() {
                 .floating { animation: floating 3s ease-in-out infinite; }
                 @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-                .bouncy-btn { font-weight: 900; border: none; padding: 8px 16px; border-radius: 12px; cursor: pointer; transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; }
+                .bouncy-btn { font-weight: 900; border: none; padding: 8px 16px; border-radius: 12px; cursor: pointer; transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; text-decoration: none; }
                 .bouncy-btn:hover { transform: scale(1.05); }
 
                 /* MOBILE SPECIFIC CSS */
@@ -252,7 +264,6 @@ export default function DigiGyanPanel() {
             {/* MOBILE HEADER */}
             <div className="mobile-header">
                 <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                    {/* Hamburger Button */}
                     <button
                         onClick={() => setSidebarOpen(true)}
                         style={{ background: "#FFD93D", border: "4px solid white", width: 48, height: 48, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, cursor: "pointer", boxShadow: "0 5px 15px rgba(0,0,0,0.1)", color: "#2D3436" }}
@@ -260,7 +271,6 @@ export default function DigiGyanPanel() {
                         🍔
                     </button>
 
-                    {/* Logo & Title */}
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => router.push('/')}>
                         <div style={{ background: "white", padding: "6px", borderRadius: "14px", display: "flex", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
                             <img src="/logo.png" alt="logo" style={{ width: 26, height: 26, objectFit: "contain" }} />
@@ -269,9 +279,8 @@ export default function DigiGyanPanel() {
                     </div>
                 </div>
 
-                {/* Right Side Avatar/Login */}
                 {user ? (
-                    <div style={{ width: 48, height: 48, borderRadius: 16, background: "#FFD93D", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, border: "4px solid white", cursor: "pointer", fontWeight: 900, color: "#2D3436", boxShadow: "0 5px 15px rgba(0,0,0,0.1)" }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 16, background: "#FFD93D", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, border: "4px solid white", cursor: "pointer", fontWeight: 900, color: "#2D3436", boxShadow: "0 5px 15px rgba(0,0,0,0.1)" }} onClick={() => setShowDropdown(!showDropdown)}>
                         {user.initials}
                     </div>
                 ) : (
@@ -286,10 +295,8 @@ export default function DigiGyanPanel() {
 
             {/* SIDEBAR */}
             <div className="sidebar">
-                {/* Mobile Close X Button */}
                 <button className="mobile-close-btn" onClick={() => setSidebarOpen(false)}>✕</button>
 
-                {/* Header Area */}
                 <motion.div
                     initial={{ y: -50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -297,7 +304,6 @@ export default function DigiGyanPanel() {
                     onClick={() => router.push('/')}
                     className="mb-8 flex flex-col items-center justify-center gap-4 cursor-pointer drop-shadow-2xl group w-fit mx-auto md:mx-0"
                 >
-                    {/* --- Glassmorphism Logo Container with Highlight --- */}
                     <motion.div
                         animate={{
                             boxShadow: [
@@ -309,30 +315,20 @@ export default function DigiGyanPanel() {
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         className="relative bg-white/20 p-4 rounded-[28px] border-4 border-white/30 backdrop-blur-xl group-hover:bg-white transition-all overflow-hidden"
                     >
-                        {/* Animated Inner Shine */}
                         <motion.div
                             animate={{ x: [-100, 150] }}
                             transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
                             className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-[-20deg] z-10"
                         />
-
-                        <img
-                            src="/logo.png"
-                            alt="DigiGyan Logo"
-                            className="w-16 h-16 object-contain relative z-20 group-hover:scale-110 transition-transform"
-                        />
+                        <img src="/logo.png" alt="DigiGyan Logo" className="w-16 h-16 object-contain relative z-20 group-hover:scale-110 transition-transform" />
                     </motion.div>
 
-                    {/* --- Typography Container --- */}
                     <div className="flex flex-col items-center text-center mt-1">
-                        <span className="text-4xl md:text-5xl font-black text-white italic tracking-tighter drop-shadow-md leading-none">
-                            DigiGyan
-                        </span>
-                        <span className="text-[12px] font-black text-[#FFD93D] uppercase tracking-widest mt-2 drop-shadow-md">
-                            Magic Library ✨
-                        </span>
+                        <span className="text-4xl md:text-5xl font-black text-white italic tracking-tighter drop-shadow-md leading-none">DigiGyan</span>
+                        <span className="text-[12px] font-black text-[#FFD93D] uppercase tracking-widest mt-2 drop-shadow-md">Magic Library ✨</span>
                     </div>
                 </motion.div>
+
                 <nav style={{ flex: 1 }}>
                     {navItems.map(item => (
                         <button
@@ -340,7 +336,7 @@ export default function DigiGyanPanel() {
                             className={`nav-btn ${activeNav === item.id ? 'active' : ''}`}
                             onClick={() => {
                                 setActiveNav(item.id);
-                                setSidebarOpen(false); // Auto-close sidebar on mobile after clicking
+                                setSidebarOpen(false);
                             }}
                         >
                             <span style={{ fontSize: 24 }}>{item.emoji}</span> {item.label}
@@ -370,12 +366,79 @@ export default function DigiGyanPanel() {
                             <input className="search-input" placeholder="Find magic..." value={search} onChange={(e) => setSearch(e.target.value)} />
                         </div>
 
-                        {/* Desktop Avatar Profile (Hidden on Mobile) */}
-                        <div className="desktop-header-title">
-                            {user ? (
-                                <div style={{ width: 65, height: 65, borderRadius: 22, background: "#FFD93D", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, border: "6px solid white", cursor: "pointer" }}>{user.initials}</div>
+                        {/* Desktop Avatar Profile Dropdown */}
+                        <div className="desktop-header-title" style={{ position: "relative" }}>
+                            {isLoggedIn && user ? (
+                                <>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05, rotate: -2 }}
+                                        onClick={() => setShowDropdown(!showDropdown)}
+                                        style={{
+                                            background: "white", border: "6px solid white", borderRadius: "50px",
+                                            padding: "6px 16px 6px 6px", display: "flex", alignItems: "center", gap: "10px",
+                                            cursor: "pointer", boxShadow: "0 10px 25px rgba(108, 92, 231, 0.15)", outline: "none"
+                                        }}
+                                    >
+                                        <div style={{ width: 45, height: 45, background: "#FFD93D", borderRadius: "20px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900, color: "#2D3436" }}>
+                                            {user?.initials || "AJ"}
+                                        </div>
+                                        <span style={{ fontSize: 16, fontWeight: 900, color: "#2D3436", display: "none", "@media (min-width: 768px)": { display: "block" } }}>
+                                            {user?.name?.split(' ')[0] || "Admin"}
+                                        </span>
+                                        <ChevronDown size={20} color="#6C5CE7" style={{ transform: showDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }} />
+                                    </motion.button>
+
+                                    <AnimatePresence>
+                                        {showDropdown && (
+                                            <motion.div
+                                                variants={dropdownVars}
+                                                initial="hidden" animate="visible" exit="exit"
+                                                style={{
+                                                    position: "absolute", right: 0, top: "calc(100% + 15px)", width: "240px",
+                                                    background: "white", borderRadius: "40px", padding: "15px",
+                                                    border: "6px solid white", boxShadow: "0 25px 50px rgba(108, 92, 231, 0.2)", zIndex: 50
+                                                }}
+                                            >
+                                                <div style={{ padding: "10px 15px", borderBottom: "4px dashed #F0F4FF", marginBottom: "10px" }}>
+                                                    <p style={{ fontSize: 11, fontWeight: 900, color: "#A29BFE", textTransform: "uppercase", letterSpacing: "2px", margin: 0 }}>Secret Menu 🤫</p>
+                                                </div>
+
+                                                <MenuLink icon={<FileText size={20} color="#FF7675" />} label="Terms" />
+                                                <MenuLink icon={<ShieldCheck size={20} color="#55EFC4" />} label="Privacy" />
+                                                <MenuLink icon={<Info size={20} color="#6C5CE7" />} label="Help" />
+
+                                                <div style={{ height: "4px", background: "#F0F4FF", margin: "10px", borderRadius: "10px" }}></div>
+
+                                                <motion.button
+                                                    whileHover={{ x: 10, backgroundColor: "#FFF0F0", borderColor: "#FFD2D2" }}
+                                                    onClick={() => { logout(); setShowDropdown(false); router.push("/login"); }}
+                                                    style={{
+                                                        width: "100%", padding: "12px 20px", textAlign: "left", fontSize: 15,
+                                                        fontWeight: 900, color: "#FF6B6B", background: "transparent", borderRadius: "20px",
+                                                        display: "flex", alignItems: "center", gap: "12px", cursor: "pointer",
+                                                        border: "2px solid transparent", outline: "none", transition: "all 0.2s"
+                                                    }}
+                                                >
+                                                    <LogOut size={20} /> Sign Out
+                                                </motion.button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </>
                             ) : (
-                                <button onClick={() => router.push('/login')} style={{ background: "#6C5CE7", color: "white", border: "6px solid white", padding: "12px 28px", borderRadius: "50px", fontWeight: 900, cursor: "pointer" }}>Login ✨</button>
+                                <motion.button
+                                    whileHover={{ scale: 1.08, rotate: 3 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => router.push('/login')}
+                                    style={{
+                                        background: "#FFEAA7", color: "#D6A317", border: "6px solid white", padding: "12px 30px",
+                                        borderRadius: "50px", fontSize: "18px", fontWeight: 900, cursor: "pointer",
+                                        boxShadow: "0 10px 0 0 #F9CA24, 0 15px 25px rgba(249, 202, 36, 0.4)",
+                                        outline: "none", display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginTop: "-5px"
+                                    }}
+                                >
+                                    Log In ✨
+                                </motion.button>
                             )}
                         </div>
                     </div>
@@ -395,7 +458,7 @@ export default function DigiGyanPanel() {
                                     </div>
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 20, fontWeight: 900, color: "#2D3436", lineHeight: 1.2, height: "48px", overflow: "hidden" }}>{book.PR_NAME}</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
-                                        <button className="bouncy-btn" style={{ background: "#F1F2F6", color: "#636E72" }} onClick={(e) => e.stopPropagation()}>View 👀</button>
+                                        <a href={book.PR_EBOOK_URL} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#F1F2F6", color: "#636E72" }} onClick={(e) => e.stopPropagation()}>View 👀</a>
                                         <button className="bouncy-btn" style={{ background: "#E0DAFF", color: "#6C5CE7" }} onClick={(e) => e.stopPropagation()}>Download ⬇️</button>
                                     </div>
                                 </>
@@ -403,29 +466,31 @@ export default function DigiGyanPanel() {
 
                             {/* --- VIEW 2: ANIMATIONS UI --- */}
                             {activeNav === "animations" && (
-                                <Link href={`/subjects/video?bookid=${book.PR_ID}`} >
-                                    <div className="video-frame">
-                                        {book.PR_URL && <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }} />}
-                                        <div className="play-btn-overlay">▶️</div>
-                                        <span style={{ position: "absolute", top: 10, left: 10, background: "#FF6B6B", padding: "4px 10px", borderRadius: 10, fontSize: 10, fontWeight: 900, color: "white" }}>HD Video</span>
+                                <>
+                                    <div className="image-frame">
+                                        {book.PR_URL ? <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span className="floating" style={{ fontSize: 60 }}>📖</span>}
+                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7" }}>Book</span>
                                     </div>
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 18, fontWeight: 900, color: "#2D3436", lineHeight: 1.2 }}>{book.PR_NAME} - Toon</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
-                                        <button className="bouncy-btn" style={{ background: "#FF6B6B", color: "white" }} onClick={(e) => e.stopPropagation()}>Watch Now 🍿</button>
+                                        <button className="bouncy-btn" style={{ background: "#FF6B6B", color: "white" }} onClick={(e) => { e.stopPropagation(); router.push(`/subjects/video?bookid=${book.PR_ID}`); }}>Watch  🍿</button>
+                                        <button className="bouncy-btn" style={{ background: "#fff7f7ff", color: "#FF6B6B" }} onClick={(e) => e.stopPropagation()}>Download ⬇️</button>
+
                                     </div>
-                                </Link>
+                                </>
                             )}
 
                             {/* --- VIEW 3: TESTS UI --- */}
                             {activeNav === "tests" && (
                                 <>
-                                    <div className="quiz-frame">
-                                        <span className="floating" style={{ fontSize: 50, marginBottom: 5 }}>🏆</span>
-                                        <span style={{ fontWeight: 900, color: "#00B894", fontSize: 14 }}>10 Questions</span>
+                                    <div className="image-frame">
+                                        {book.PR_URL ? <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span className="floating" style={{ fontSize: 60 }}>📖</span>}
+                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7" }}>Book</span>
                                     </div>
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 18, fontWeight: 900, color: "#2D3436", lineHeight: 1.2 }}>{book.PR_NAME} Quiz</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
-                                        <button className="bouncy-btn" style={{ background: "#00B894", color: "white" }} onClick={(e) => e.stopPropagation()}>Start Mission ⏱️</button>
+                                        <a href={book.PR_TG_URL} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#00B894", color: "white" }} onClick={(e) => e.stopPropagation()}>Test Generator ⏱️</a>
+
                                     </div>
                                 </>
                             )}
