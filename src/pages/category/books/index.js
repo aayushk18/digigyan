@@ -62,7 +62,6 @@ export default function DigiGyanPanel() {
     useEffect(() => {
         if (!router.isReady) return;
 
-        // If a categoryId is in the URL and differs from context, update it & wait for re-render
         if (categoryId && String(categoryId) !== String(seriesId)) {
             setSeriesId(categoryId);
             return;
@@ -110,9 +109,10 @@ export default function DigiGyanPanel() {
         const loadBooks = async () => {
             setLoading(true);
             setIsTimeout(false);
-            const networkTimer = setTimeout(() => setIsTimeout(true), 10000);
+            const networkTimer = setTimeout(() => setIsTimeout(true), 15000); // Bumped to 15s to allow nested fetching
 
             try {
+                // 1. Fetch the basic book list
                 const res = await fetch('https://apis.tlmate.com/content-api/books-list', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -128,7 +128,36 @@ export default function DigiGyanPanel() {
                 const result = await res.json();
 
                 if (result.STATUS === "SUCCESS") {
-                    setBooks(result.DATA || []);
+                    const basicBooks = result.DATA || [];
+
+                    // 2. Fetch specific URLs for each book concurrently
+                    const enrichedBooks = await Promise.all(basicBooks.map(async (book) => {
+                        try {
+                            const detailRes = await fetch('https://apis.tlmate.com/content-api/book-content-data', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    CBT_REQUEST_DATA: {
+                                        PR_BOOK_ID: parseInt(book.PR_ID),
+                                        PR_TOKEN: config.PR_TOKEN,
+                                        PR_APP_KEY: config.PR_APP_KEY
+                                    }
+                                })
+                            });
+                            const detailResult = await detailRes.json();
+
+                            // 3. Merge the URLs (EBOOK, TG, VIDEO) into the main book object
+                            if (detailResult.STATUS === "SUCCESS" && detailResult.DATA) {
+                                return { ...book, ...detailResult.DATA };
+                            }
+                            return book;
+                        } catch (e) {
+                            console.error(`Failed to fetch details for book ${book.PR_ID}`);
+                            return book;
+                        }
+                    }));
+
+                    setBooks(enrichedBooks);
                 }
             } catch (error) {
                 console.error("Network error while fetching books:", error);
@@ -291,7 +320,7 @@ export default function DigiGyanPanel() {
                 )}
             </div>
 
-            {/* SIDEBAR BACKDROP (For closing on mobile) */}
+            {/* SIDEBAR BACKDROP */}
             <div className={`sidebar-backdrop ${isSidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
             {/* SIDEBAR */}
@@ -455,11 +484,11 @@ export default function DigiGyanPanel() {
                                 <>
                                     <div className="image-frame">
                                         {book.PR_URL ? <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span className="floating" style={{ fontSize: 60 }}>📖</span>}
-                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7" }}>Book</span>
+                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7", boxShadow: "0 5px 10px rgba(0,0,0,0.1)" }}>{book.PR_TYPE || "Book"}</span>
                                     </div>
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 20, fontWeight: 900, color: "#2D3436", lineHeight: 1.2, height: "48px", overflow: "hidden" }}>{book.PR_NAME}</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
-                                        <a href={book.PR_EBOOK_URL} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#F1F2F6", color: "#636E72" }} onClick={(e) => e.stopPropagation()}>View 👀</a>
+                                        <a href={book.PR_EBOOK_URL || "#"} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#F1F2F6", color: "#636E72", opacity: book.PR_EBOOK_URL ? 1 : 0.5 }} onClick={(e) => { e.stopPropagation(); if (!book.PR_EBOOK_URL) e.preventDefault(); }}>View 👀</a>
                                         <button className="bouncy-btn" style={{ background: "#E0DAFF", color: "#6C5CE7" }} onClick={(e) => e.stopPropagation()}>Download ⬇️</button>
                                     </div>
                                 </>
@@ -470,13 +499,12 @@ export default function DigiGyanPanel() {
                                 <>
                                     <div className="image-frame">
                                         {book.PR_URL ? <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span className="floating" style={{ fontSize: 60 }}>📖</span>}
-                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7" }}>Book</span>
+                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7", boxShadow: "0 5px 10px rgba(0,0,0,0.1)" }}>{book.PR_TYPE || "Book"}</span>
                                     </div>
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 18, fontWeight: 900, color: "#2D3436", lineHeight: 1.2 }}>{book.PR_NAME} - Toon</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
-                                        <button className="bouncy-btn" style={{ background: "#FF6B6B", color: "white" }} onClick={(e) => { e.stopPropagation(); router.push(`/subjects/video?bookid=${book.PR_ID}`); }}>Watch  🍿</button>
+                                        <button className="bouncy-btn" style={{ background: "#FF6B6B", color: "white", opacity: book.PR_VIDEO_DATA?.length > 0 ? 1 : 0.5 }} onClick={(e) => { e.stopPropagation(); if (book.PR_VIDEO_DATA?.length > 0) router.push(`/subjects/video?bookid=${book.PR_ID}`); }}>Watch 🍿</button>
                                         <button className="bouncy-btn" style={{ background: "#fff7f7ff", color: "#FF6B6B" }} onClick={(e) => e.stopPropagation()}>Download ⬇️</button>
-
                                     </div>
                                 </>
                             )}
@@ -486,13 +514,12 @@ export default function DigiGyanPanel() {
                                 <>
                                     <div className="image-frame">
                                         {book.PR_URL ? <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span className="floating" style={{ fontSize: 60 }}>📖</span>}
-                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7" }}>Book</span>
+                                        <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7", boxShadow: "0 5px 10px rgba(0,0,0,0.1)" }}>{book.PR_TYPE || "Book"}</span>
                                     </div>
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 18, fontWeight: 900, color: "#2D3436", lineHeight: 1.2 }}>{book.PR_NAME} Quiz</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
-                                        <a href={book.PR_TG_URL} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#00B894", color: "white" }} onClick={(e) => e.stopPropagation()}>Generate ⏱️</a>
+                                        <a href={book.PR_TG_URL || "#"} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#00B894", color: "white", opacity: book.PR_TG_URL ? 1 : 0.5 }} onClick={(e) => { e.stopPropagation(); if (!book.PR_TG_URL) e.preventDefault(); }}>Generate ⏱️</a>
                                         <button className="bouncy-btn" style={{ background: "#fff7f7ff", color: "#FF6B6B" }} onClick={(e) => e.stopPropagation()}>Download ⬇️</button>
-
                                     </div>
                                 </>
                             )}
