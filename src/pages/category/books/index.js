@@ -194,6 +194,7 @@ export default function DigiGyanPanel() {
         );
     }
 
+
     return (
         <div style={{ fontFamily: "'Nunito', sans-serif", minHeight: "100vh", background: "#F0F4FF", color: "#2D3436" }}>
             <style>{`
@@ -489,7 +490,8 @@ export default function DigiGyanPanel() {
                                     </div>
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 18, fontWeight: 900, color: "#2D3436", lineHeight: 1.2 }}>{book.PR_NAME} Quiz</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
-                                        <a href={book.PR_TG_URL} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#00B894", color: "white" }} onClick={(e) => e.stopPropagation()}>Test Generator ⏱️</a>
+                                        <a href={book.PR_TG_URL} target="_blank" rel="noopener noreferrer" className="bouncy-btn" style={{ background: "#00B894", color: "white" }} onClick={(e) => e.stopPropagation()}>Generate ⏱️</a>
+                                        <button className="bouncy-btn" style={{ background: "#fff7f7ff", color: "#FF6B6B" }} onClick={(e) => e.stopPropagation()}>Download ⬇️</button>
 
                                     </div>
                                 </>
