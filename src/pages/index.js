@@ -490,18 +490,16 @@
 
 
 
-
-
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ScanLine, FileEdit, FileText, Loader2, BookOpen, Lock,
-  Sparkles, Star, Rocket, Ghost, Cloud, Sun
+  Sparkles, Star, Rocket, Ghost, Cloud, Sun, Heart, Clock
 } from 'lucide-react';
 import Link from 'next/link';
 import DigiGyanNav from '@/components/Navbar';
 import { useApp } from '@/context/AppContext';
+import { useRouter } from 'next/router';
 
 // --- Bouncing Background Object Component ---
 const FloatingBlob = ({ color, size, duration, delay, x, y }) => (
@@ -534,13 +532,31 @@ const FloatingBlob = ({ color, size, duration, delay, x, y }) => (
 
 const UserPanel = () => {
   const { config, seriesId, classId, series, Class, isLoggedIn } = useApp();
-  const [books, setBooks] = useState([]);
-  const [loadingBooks, setLoadingBooks] = useState(false);
-  const [isMounted, setIsMounted] = useState(false); // FIXED: Hydration Guard
-
+  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
   const { PR_APP_KEY, PR_TOKEN } = config;
 
-  // Set mounted state to true after initial render
+  // --- Data States ---
+  const [activeTab, setActiveTab] = useState('favorite'); // 'all', 'favorite', 'recent'
+  const [activeNav, setActiveNav] = useState('books'); // Toggle state: 'books' or 'animations'
+
+  const [books, setBooks] = useState([]);
+  const [loadingBooks, setLoadingBooks] = useState(false);
+
+  const [favoriteBooks, setFavoriteBooks] = useState([]);
+  const [loadingFav, setLoadingFav] = useState(false);
+
+  const [recentBooks, setRecentBooks] = useState([]);
+  const [loadingRecent, setLoadingRecent] = useState(false);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (isLoggedIn === false) {
+      router.replace('/login');
+      return;
+    }
+  }, [router.isReady, isLoggedIn]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -563,6 +579,7 @@ const UserPanel = () => {
     }
   };
 
+  // --- API Fetchers ---
   useEffect(() => {
     const fetchBooks = async () => {
       if (!seriesId || !classId) return;
@@ -587,6 +604,59 @@ const UserPanel = () => {
     fetchBooks();
   }, [seriesId, classId, PR_APP_KEY, PR_TOKEN]);
 
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!isLoggedIn || !PR_TOKEN) return;
+      setLoadingFav(true);
+      try {
+        const response = await fetch('https://apis.tlmate.com/content-api/favorite-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            CBT_REQUEST_DATA: { PR_TOKEN, PR_CONTENT_TYPE: "book", PR_APP_KEY }
+          })
+        });
+        const result = await response.json();
+        if (result.STATUS === "SUCCESS") setFavoriteBooks(result.DATA || []);
+      } catch (error) { console.error(error); } finally { setLoadingFav(false); }
+    };
+    fetchFavorites();
+  }, [isLoggedIn, PR_APP_KEY, PR_TOKEN]);
+
+  useEffect(() => {
+    const fetchRecent = async () => {
+      if (!isLoggedIn || !PR_TOKEN) return;
+      setLoadingRecent(true);
+      try {
+        const response = await fetch('https://apis.tlmate.com/content-api/recent-track-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            CBT_REQUEST_DATA: { PR_TOKEN, PR_CONTENT_TYPE: "book", PR_APP_KEY }
+          })
+        });
+        const result = await response.json();
+        if (result.STATUS === "SUCCESS") setRecentBooks(result.DATA || []);
+      } catch (error) { console.error(error); } finally { setLoadingRecent(false); }
+    };
+    fetchRecent();
+  }, [isLoggedIn, PR_APP_KEY, PR_TOKEN]);
+
+  // --- Determine which list to display ---
+  let displayBooks = [];
+  let isDisplayLoading = false;
+
+  if (activeTab === 'all') {
+    displayBooks = books;
+    isDisplayLoading = loadingBooks;
+  } else if (activeTab === 'favorite') {
+    displayBooks = favoriteBooks;
+    isDisplayLoading = loadingFav;
+  } else if (activeTab === 'recent') {
+    displayBooks = recentBooks;
+    isDisplayLoading = loadingRecent;
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden font-['Nunito',_sans-serif] bg-[#F0F4FF]">
       <style>{`
@@ -603,10 +673,59 @@ const UserPanel = () => {
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
+
+        /* Added Classes for Dynamic UI Cards */
+        .image-frame {
+          width: 100%;
+          aspect-ratio: 3/4;
+          background: #F0F4FF;
+          border-radius: 35px;
+          margin-bottom: 16px;
+          position: relative;
+          overflow: hidden;
+          border: 4px solid #F0F4FF;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .video-frame {
+          width: 100%;
+          aspect-ratio: 16/9;
+          background: #2D3436;
+          border-radius: 25px;
+          margin-bottom: 16px;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .play-btn-overlay {
+          position: absolute;
+          font-size: 40px;
+          z-index: 10;
+          pointer-events: none;
+        }
+
+        .bouncy-btn {
+          flex: 1;
+          padding: 12px;
+          border-radius: 20px;
+          font-weight: 900;
+          font-size: 12px;
+          border: none;
+          cursor: pointer;
+          transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .bouncy-btn:active {
+          transform: scale(0.9);
+        }
       `}</style>
 
-      {/* --- CRAZY BACKGROUND LAYER --- */}
-      {/* We only render the moving objects on the client to avoid hydration errors */}
+      {/* --- BACKGROUND LAYER --- */}
       <div className="fixed inset-0 bg-animated -z-10">
         {isMounted && (
           <>
@@ -672,109 +791,139 @@ const UserPanel = () => {
             variants={containerVars}
             initial="hidden"
             animate="visible"
-            className="mb-20"
+            className="mb-12"
           >
             <h2 className="text-xs font-black text-[#6C5CE7] uppercase tracking-[0.5em] mb-8 px-4">Magic Toolbar 🎨</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <ActionCard icon={<ScanLine size={40} />} title="Magic Scan" color="bg-[#4834D4]" delay={0.1} />
+              <ActionCard icon={<ScanLine size={40} />} title="Magic Scan" color="bg-[#4834D4]" />
+              <Link href="/subjects" className="no-underline">
+                <ActionCard icon={<FileEdit size={40} />} title="Manual Select" color="bg-[#00B894]" />
+              </Link >
               <Link href="/category" className="no-underline">
-                <ActionCard icon={<FileEdit size={40} />} title="Manual Select" color="bg-[#00B894]" delay={0.2} />
+                <ActionCard icon={<FileText size={40} />} title="All Content" color="bg-[#E84393]" />
               </Link>
-              <ActionCard icon={<FileText size={40} />} title="Quiz Time" color="bg-[#E84393]" delay={0.3} />
             </div>
           </motion.section>
+        )}
+
+        {/* --- BOOK TABS --- */}
+        {isLoggedIn && (
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+            {[
+              { id: 'favorite', label: '❤️ My Favorites' },
+              { id: 'recent', label: '🕒 Recently Read' }
+            ].map((tab) => (
+              <motion.button
+                key={tab.id}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-8 py-4 rounded-[25px] font-black text-lg transition-all border-4 flex items-center gap-2 ${activeTab === tab.id
+                  ? 'bg-[#6C5CE7] text-white border-[#6C5CE7] shadow-[0_8px_0_0_#4834D4]'
+                  : 'bg-white text-slate-500 border-white shadow-[0_8px_0_0_#E0DAFF] hover:-translate-y-1'
+                  }`}
+              >
+                {tab.label}
+              </motion.button>
+            ))}
+          </div>
         )}
 
         <section className="mb-20">
           <div className="flex items-center gap-4 mb-8 px-4">
             <div className="h-1 flex-1 bg-white/40 rounded-full" />
             <h2 className="text-sm font-black text-slate-600 uppercase tracking-widest">
-              {series || 'The Magic Shelf'}
+              {activeTab === 'all' && ((typeof series === 'object' ? series?.PR_NAME : series) || 'All Books')}
+              {activeTab === 'favorite' && 'Your Favorite Collection'}
+              {activeTab === 'recent' && 'Jump Back In'}
             </h2>
             <div className="h-1 flex-1 bg-white/40 rounded-full" />
           </div>
 
-          {loadingBooks ? (
+          {isDisplayLoading ? (
             <div className="flex flex-col items-center p-20">
               <Loader2 className="text-[#6C5CE7] animate-spin" size={80} />
               <p className="font-black text-2xl text-[#6C5CE7] mt-6">Summoning Books...</p>
             </div>
           ) : (
             <motion.div
+              key={activeTab + activeNav} // Forces re-animation when switching tabs or view format
               variants={containerVars}
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
+              animate="visible"
               className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8"
             >
-              {books.length > 0 ? (
-                (isLoggedIn ? books : books.slice(0, 6)).map((book, idx) => {
+              {displayBooks.length > 0 ? (
+                (isLoggedIn ? displayBooks : displayBooks.slice(0, 6)).map((book, idx) => {
                   const isLocked = !isLoggedIn && idx >= 4;
                   return (
                     <motion.div
                       key={book.PR_ID}
                       variants={itemVars}
                       whileHover={{ scale: 1.05, rotate: idx % 2 === 0 ? 2 : -2 }}
-                      className="relative bg-white rounded-[45px] p-5 shadow-[0_15px_0_0_#E0DAFF] border-4 border-white flex flex-col group"
+                      className="relative bg-white rounded-[45px] p-5 shadow-[0_15px_0_0_#E0DAFF] border-4 border-white flex flex-col group overflow-hidden"
                     >
-                      {/* --- Book Image --- */}
-                      <div className="w-full aspect-[3/4] bg-[#F0F4FF] rounded-[35px] mb-4 overflow-hidden relative border-4 border-[#F0F4FF]">
-                        {isLocked ? (
-                          <div className="absolute inset-0 bg-slate-900/80 flex flex-col items-center justify-center text-white p-4">
-                            <Lock size={40} className="text-yellow-400 mb-2 floating" />
-                            <span className="font-black text-[10px] tracking-widest uppercase text-yellow-400">Locked!</span>
+                      {/* Favorite Badge Global Overlay */}
+                      {book.PR_IS_FAVORITE && (
+                        <div className="absolute top-6 right-6 z-20 bg-white p-2 rounded-full shadow-lg">
+                          <Heart size={16} className="text-red-500 fill-red-500" />
+                        </div>
+                      )}
+
+                      {isLocked ? (
+                        <>
+                          <div className="w-full aspect-[3/4] bg-[#F0F4FF] rounded-[35px] mb-4 overflow-hidden relative border-4 border-[#F0F4FF]">
+                            <div className="absolute inset-0 bg-slate-900/80 flex flex-col items-center justify-center text-white p-4">
+                              <Lock size={40} className="text-yellow-400 mb-2 floating" />
+                              <span className="font-black text-[10px] tracking-widest uppercase text-yellow-400">Locked!</span>
+                            </div>
                           </div>
-                        ) : (
-                          <img
-                            src={book.PR_URL || "/placeholder.png"}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            alt="cover"
-                          />
-                        )}
-                      </div>
-
-                      {/* --- Book Title --- */}
-                      <h3 className="text-base font-black text-slate-800 line-clamp-2 mb-4 leading-tight min-h-[48px] px-1 uppercase tracking-tight">
-                        {book.PR_NAME}
-                      </h3>
-
-                      {/* --- Action Buttons --- */}
-                      <div className="flex flex-col gap-3 mt-auto">
-                        {!isLocked ? (
-                          <>
-                            {/* Option 1: Read (Purple) */}
-                            <Link href={`/subjects/book?bookid=${book.PR_ID}`} className="no-underline">
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                className="w-full py-3 bg-[#6C5CE7] text-white rounded-[20px] font-black text-xs shadow-[0_5px_0_0_#4834D4] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2"
-                              >
-                                READ! 📖
-                              </motion.button>
-                            </Link>
-
-                            {/* Option 2: Download (Emerald) */}
-                            <motion.button
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => window.open(book.PR_EBOOK_URL, '_blank')}
-                              className="w-full py-3 bg-[#00B894] text-white rounded-[20px] font-black text-xs shadow-[0_5px_0_0_#009475] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center gap-2"
-                            >
-                              SAVE 📥
-                            </motion.button>
-                          </>
-                        ) : (
-                          /* Locked State */
-                          <div className="w-full py-6 bg-slate-100 rounded-[25px] text-slate-300 font-black text-xs text-center uppercase tracking-widest border-2 border-dashed border-slate-200">
+                          <h3 className="text-base font-black text-slate-800 line-clamp-2 mb-4 leading-tight min-h-[48px] px-1 uppercase tracking-tight">
+                            {book.PR_NAME}
+                          </h3>
+                          <div className="w-full py-6 mt-auto bg-slate-100 rounded-[25px] text-slate-300 font-black text-xs text-center uppercase tracking-widest border-2 border-dashed border-slate-200">
                             No Access 🛑
                           </div>
-                        )}
-                      </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* --- VIEW 1: FLIPBOOKS UI --- */}
+                          {activeNav === "books" && (
+                            <>
+                              <div className="image-frame">
+                                {book.PR_URL ? <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span className="floating" style={{ fontSize: 60 }}>📖</span>}
+                                <span style={{ position: "absolute", top: 10, right: 10, background: "white", padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 900, color: "#6C5CE7" }}>Book</span>
+                              </div>
+                              <h3 style={{ margin: "0 0 10px 0", fontSize: 20, fontWeight: 900, color: "#2D3436", lineHeight: 1.2, height: "48px", overflow: "hidden" }}>{book.PR_NAME}</h3>
+                              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: "auto" }}>
+                                <button className="bouncy-btn" style={{ background: "#F1F2F6", color: "#636E72" }} onClick={(e) => { e.preventDefault(); router.push(`/subjects/book?bookid=${book.PR_ID}`); }}>View 👀</button>
+                                <button className="bouncy-btn" style={{ background: "#E0DAFF", color: "#6C5CE7" }} onClick={(e) => { e.preventDefault(); if (book.PR_EBOOK_URL) window.open(book.PR_EBOOK_URL, '_blank'); }}>Download ⬇️</button>
+                              </div>
+                            </>
+                          )}
+
+                          {/* --- VIEW 2: ANIMATIONS UI --- */}
+                          {activeNav === "animations" && (
+                            <Link href={`/subjects/video?bookid=${book.PR_ID}`} className="no-underline flex flex-col h-full">
+                              <div className="video-frame">
+                                {book.PR_URL && <img src={book.PR_URL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }} />}
+                                <div className="play-btn-overlay">▶️</div>
+                                <span style={{ position: "absolute", top: 10, left: 10, background: "#FF6B6B", padding: "4px 10px", borderRadius: 10, fontSize: 10, fontWeight: 900, color: "white" }}>HD Video</span>
+                              </div>
+                              <h3 style={{ margin: "0 0 10px 0", fontSize: 18, fontWeight: 900, color: "#2D3436", lineHeight: 1.2 }}>{book.PR_NAME} - Toon</h3>
+                              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: "auto" }}>
+                                <button className="bouncy-btn" style={{ background: "#FF6B6B", color: "white", width: "100%" }} onClick={(e) => e.stopPropagation()}>Watch Now 🍿</button>
+                              </div>
+                            </Link>
+                          )}
+                        </>
+                      )}
                     </motion.div>
                   );
                 })
               ) : (
                 <div className="col-span-full py-20 text-center">
                   <Ghost size={60} className="mx-auto text-slate-300 mb-4" />
-                  <p className="font-black text-slate-400">No books found in this dimension.</p>
+                  <p className="font-black text-slate-400">No content found in this dimension.</p>
                 </div>
               )}
             </motion.div>
@@ -802,11 +951,34 @@ const UserPanel = () => {
           </motion.div>
         )}
       </main>
+
+      {/* --- FIXED TOGGLE SWITCH --- */}
+      <div className="fixed bottom-6 right-6 z-50 bg-white/40 backdrop-blur-2xl p-1.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/60 flex items-center gap-1">
+        <button
+          onClick={() => setActiveNav('books')}
+          className={`px-4 py-2 rounded-full font-extrabold text-xs tracking-wide transition-all duration-300 flex items-center gap-1.5 ${activeNav === 'books'
+              ? 'bg-[#6C5CE7] text-white shadow-[0_2px_10px_rgba(108,92,231,0.4)]'
+              : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-white/50'
+            }`}
+        >
+          <span className="text-sm">📚</span> Books
+        </button>
+        <button
+          onClick={() => setActiveNav('animations')}
+          className={`px-4 py-2 rounded-full font-extrabold text-xs tracking-wide transition-all duration-300 flex items-center gap-1.5 ${activeNav === 'animations'
+              ? 'bg-[#FF6B6B] text-white shadow-[0_2px_10px_rgba(255,107,107,0.4)]'
+              : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-white/50'
+            }`}
+        >
+          <span className="text-sm">🍿</span> Animations
+        </button>
+      </div>
+
     </div>
   );
 };
 
-const ActionCard = ({ icon, title, color, delay }) => (
+const ActionCard = ({ icon, title, color }) => (
   <motion.div
     variants={{ hidden: { y: 30, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
     whileHover={{ scale: 1.05, y: -5 }}

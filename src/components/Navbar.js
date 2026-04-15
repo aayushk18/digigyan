@@ -161,8 +161,8 @@ const DigiGyanNav = () => {
                     </motion.div>
 
                     {/* --- DYNAMIC SELECTORS --- */}
-                    <nav className="hidden lg:flex items-center gap-6">
-                        {/* Category Selector */}
+                    {/* <nav className="hidden lg:flex items-center gap-6">
+                     
                         <div className="relative">
                             <motion.button
                                 whileHover={{ y: -4 }}
@@ -171,7 +171,7 @@ const DigiGyanNav = () => {
                                 className="flex items-center gap-3 px-6 py-2.5 bg-white rounded-[20px] text-sm font-black text-[#6C5CE7] shadow-[0_8px_0_0_#E0DAFF] hover:shadow-[0_4px_0_0_#E0DAFF] transition-all border-2 border-transparent"
                             >
                                 <BookOpen size={18} className="text-[#FF7675]" />
-                                {series || "Series"}
+                                {(typeof series === 'object' ? series?.PR_NAME : series) || "Series"}
                                 <ChevronDown size={16} className={`transition-transform duration-300 ${showCatDropdown ? 'rotate-180' : ''}`} />
                             </motion.button>
 
@@ -201,7 +201,7 @@ const DigiGyanNav = () => {
                             </AnimatePresence>
                         </div>
 
-                        {/* Class Selector */}
+                   
                         <div className={`relative ${!series && 'opacity-50 grayscale pointer-events-none'}`}>
                             <motion.button
                                 whileHover={{ y: -4 }}
@@ -239,7 +239,7 @@ const DigiGyanNav = () => {
                                 )}
                             </AnimatePresence>
                         </div>
-                    </nav>
+                    </nav> */}
                 </div>
 
                 <div className="flex items-center gap-4">

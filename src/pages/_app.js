@@ -13,16 +13,10 @@ const inter = Inter({
 export default function App({ Component, pageProps }) {
   return (
     <>
-      <style jsx global>{`
-        html {
-          font-family: ${inter.style.fontFamily};
-        }
-      `}</style>
-
       {/* Global utility to prevent device sleep */}
       <WakeLock />
 
-      <main className="min-h-screen bg-[#fbfbfd] text-[#1d1d1f] antialiased">
+      <main className={`min-h-screen bg-[#fbfbfd] text-[#1d1d1f] antialiased ${inter.className}`}>
         <AppProvider>
           <Component {...pageProps} />
         </AppProvider>
