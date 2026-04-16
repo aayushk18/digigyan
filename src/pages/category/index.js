@@ -223,7 +223,7 @@ const CategoriesPage = () => {
                         </span>
                         {/* Reduced subtitle text size and margin */}
                         <span className="text-[9px] font-black text-[#FFD93D] uppercase tracking-widest mt-0.5 drop-shadow-md">
-                            Magic Library ✨
+                            Magic in your Hands ✨
                         </span>
                     </div>
                 </motion.div>

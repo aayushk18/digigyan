@@ -145,6 +145,9 @@ const LoginPage = () => {
                 });
                 const data = await res.json();
 
+                console.log(data);
+
+
 
                 const userData = {
                     name: data.DATA.PR_NAME,
