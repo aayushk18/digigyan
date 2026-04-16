@@ -156,7 +156,7 @@ const LoginPage = () => {
                 }
 
 
-                if (data.STATUS === "SUCCESS") {
+                if (data.STATUS == "SUCCESS") {
                     login(userData);
                     router.push('/');
                     localStorage.setItem("PR_TOKEN", JSON.stringify(data.DATA.PR_TOKEN));
@@ -182,7 +182,7 @@ const LoginPage = () => {
 
 
         } catch (error) {
-            alert("OTP do not match!!!");
+            alert(error.toString);
         }
 
 
