@@ -30,6 +30,10 @@ const VideoPlayerPage = () => {
                     })
                 });
                 const result = await response.json();
+
+                console.log(result);
+
+
                 if (result.STATUS === "SUCCESS" && result.DATA) {
                     setBookData(result.DATA);
                     // Automatically set the first video as active if available
@@ -98,7 +102,7 @@ const VideoPlayerPage = () => {
         return url;
     };
 
-    const isYouTube = activeVideo?.PR_URL?.includes('youtube.com') || activeVideo?.PR_URL?.includes('youtu.be');
+    const isYouTube = activeVideo?.PR_VIDEO_URL?.includes('youtube.com') || activeVideo?.PR_VIDEO_URL?.includes('youtu.be');
 
     return (
         <div style={{ fontFamily: "'Nunito', sans-serif", minHeight: "100vh", background: "#F0F4FF", display: "flex", flexDirection: "column" }}>
@@ -211,16 +215,19 @@ const VideoPlayerPage = () => {
                                 <div className="video-frame">
                                     {isYouTube ? (
                                         <iframe
-                                            src={extractYoutubeEmbedUrl(activeVideo.PR_URL)}
+                                            src={extractYoutubeEmbedUrl(activeVideo.PR_VIDEO_URL)}
                                             style={{ width: "100%", height: "100%", border: "none" }}
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
                                         />
                                     ) : (
                                         <video
-                                            src={activeVideo.PR_URL}
+                                            src={activeVideo.PR_VIDEO_URL}
                                             controls
                                             autoPlay
+                                            className='media'
+                                            type='video/mp4'
+                                            muted // Add this line!
                                             style={{ width: "100%", height: "100%", objectFit: "contain", background: "#000" }}
                                         />
                                     )}

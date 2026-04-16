@@ -40,14 +40,13 @@ export const AppProvider = ({ children }) => {
     }, []);
 
     // 2. UPDATE LOGIN TO SAVE TO STORAGE
-    const login = () => {
-        const userData = { name: "Aakash Jha", initials: "AJ", role: "Admin" };
+    const login = (user) => {
 
         setIsLoggedIn(true);
-        setUser(userData);
+        setUser(user);
 
         // Save to browser storage
-        localStorage.setItem('digigyan_user', JSON.stringify(userData));
+        localStorage.setItem('digigyan_user', JSON.stringify(user));
     };
 
     // 3. UPDATE LOGOUT TO CLEAR STORAGE
@@ -57,6 +56,8 @@ export const AppProvider = ({ children }) => {
 
         // Remove from browser storage
         localStorage.removeItem('digigyan_user');
+        localStorage.removeItem("PR_TOKEN");
+
     };
 
     return (

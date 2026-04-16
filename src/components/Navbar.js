@@ -40,6 +40,13 @@ const DigiGyanNav = () => {
 
     const { PR_APP_KEY, PR_TOKEN } = config;
 
+    useEffect(() => {
+
+        console.log("user data is ", user);
+
+
+    }, [user])
+
     // Fetch Categories
     useEffect(() => {
         const fetchCategories = async () => {
