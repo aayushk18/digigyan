@@ -144,14 +144,13 @@ const LoginPage = () => {
                     })
                 });
                 const data = await res.json();
-                console.log(data);
+
 
                 const userData = {
                     name: data.DATA.PR_NAME,
                     initials: data.DATA.PR_NAME.split(" ")[0][0] + data.DATA.PR_NAME.split(" ")[1][0],
                     role: data?.DATA?.PR_JOB_ROLE
                 }
-
 
 
                 if (data.STATUS === "SUCCESS") {
@@ -167,17 +166,20 @@ const LoginPage = () => {
                     // Here you would trigger your actual OTP API call
                     setShowOtpModal(true);
                 } else {
+
+                    console.log("Phone Number Length is too small");
+
                     alert("Please enter a valid phone number.");
                 }
 
 
             } else {
-                alert("Please enter a valid OTP code.");
+                alert("OTP Length too small!!!");
             }
 
 
         } catch (error) {
-
+            alert("OTP do not match!!!");
         }
 
 
