@@ -795,7 +795,9 @@ const UserPanel = () => {
           >
             <h2 className="text-xs font-black text-[#6C5CE7] uppercase tracking-[0.5em] mb-8 px-4">Magic Toolbar 🎨</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <ActionCard icon={<ScanLine size={40} />} title="Magic Scan" color="bg-[#4834D4]" />
+              <Link href="/qr" className="no-underline">
+                <ActionCard icon={<ScanLine size={40} />} title="Magic Scan" color="bg-[#4834D4]" />
+              </Link>
               <Link href="/subjects" className="no-underline">
                 <ActionCard icon={<FileEdit size={40} />} title="Manual Select" color="bg-[#00B894]" />
               </Link >
@@ -957,8 +959,8 @@ const UserPanel = () => {
         <button
           onClick={() => setActiveNav('books')}
           className={`px-4 py-2 rounded-full font-extrabold text-xs tracking-wide transition-all duration-300 flex items-center gap-1.5 ${activeNav === 'books'
-              ? 'bg-[#6C5CE7] text-white shadow-[0_2px_10px_rgba(108,92,231,0.4)]'
-              : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-white/50'
+            ? 'bg-[#6C5CE7] text-white shadow-[0_2px_10px_rgba(108,92,231,0.4)]'
+            : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-white/50'
             }`}
         >
           <span className="text-sm">📚</span> Books
@@ -966,8 +968,8 @@ const UserPanel = () => {
         <button
           onClick={() => setActiveNav('animations')}
           className={`px-4 py-2 rounded-full font-extrabold text-xs tracking-wide transition-all duration-300 flex items-center gap-1.5 ${activeNav === 'animations'
-              ? 'bg-[#FF6B6B] text-white shadow-[0_2px_10px_rgba(255,107,107,0.4)]'
-              : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-white/50'
+            ? 'bg-[#FF6B6B] text-white shadow-[0_2px_10px_rgba(255,107,107,0.4)]'
+            : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-white/50'
             }`}
         >
           <span className="text-sm">🍿</span> Animations
