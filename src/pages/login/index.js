@@ -102,7 +102,7 @@ const LoginPage = () => {
                 })
             });
             const data = await res.json();
-            console.log(data);
+
 
 
 
@@ -145,7 +145,6 @@ const LoginPage = () => {
                 });
                 const data = await res.json();
 
-                console.log(data);
 
 
 
@@ -159,7 +158,7 @@ const LoginPage = () => {
                         : (nameParts[0]?.[0] || "U").toUpperCase(), // "U" for Unknown if empty
                     role: data?.DATA?.PR_JOB_ROLE || "User"
                 };
-                console.log("userdata - ", userData);
+
 
 
 
