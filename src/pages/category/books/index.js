@@ -294,12 +294,102 @@ export default function DigiGyanPanel() {
             {/* MOBILE HEADER */}
             <div className="mobile-header">
                 <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                    <button
+
+
+
+                    <motion.button
                         onClick={() => setSidebarOpen(true)}
-                        style={{ background: "#FFD93D", border: "4px solid white", width: 48, height: 48, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, cursor: "pointer", boxShadow: "0 5px 15px rgba(0,0,0,0.1)", color: "#2D3436" }}
+                        aria-label="Open Menu"
+                        initial={{ y: -50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        whileHover={{
+                            scale: 1.05,
+                            rotate: -3,
+                            backgroundColor: "#ffffff", // Matches the group-hover:bg-white
+                            color: "#bebebe" // Inverts icon color on hover for visibility
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        className=" bg-white/20"
+                        style={{
+
+                            position: "relative",
+
+                            border: "4px solid white",
+                            width: 48,
+                            height: 48,
+                            borderRadius: 16,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            color: "#ffffffff",
+                            overflow: "hidden", // Clips the shimmer effect
+                            transition: "background-color 0.3s ease",
+                            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+                        }}
                     >
-                        🍔
-                    </button>
+                        {/* 1. Pulsing Glow Effect */}
+                        <motion.div
+                            style={{
+                                position: "absolute",
+                                inset: 0,
+                                borderRadius: 12,
+                                pointerEvents: "none"
+                            }}
+                            animate={{
+                                boxShadow: [
+                                    "0 0 0px 0px rgba(255,255,255,0.4)",
+                                    "0 0 20px 10px rgba(255,255,255,0.2)",
+                                    "0 0 0px 0px rgba(255,255,255,0.4)"
+                                ]
+                            }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        />
+
+                        {/* 2. Sliding Shimmer/Sheen */}
+                        <motion.div
+                            animate={{ x: [-100, 150] }}
+                            transition={{
+                                duration: 1.5,
+                                repeat: Infinity,
+                                repeatDelay: 4,
+                                ease: "easeInOut"
+                            }}
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "50%",
+                                height: "100%",
+                                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)",
+                                transform: "skewX(-20deg)",
+                                zIndex: 1
+                            }}
+                        />
+
+                        {/* 3. The Hamburger Icon */}
+                        <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            style={{ position: "relative", zIndex: 2 }}
+                        >
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </motion.button>
+
+
 
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => router.push('/')}>
                         <div style={{ background: "white", padding: "6px", borderRadius: "14px", display: "flex", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
