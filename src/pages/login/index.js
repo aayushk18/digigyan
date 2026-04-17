@@ -149,11 +149,18 @@ const LoginPage = () => {
 
 
 
+                const fullName = data?.DATA?.PR_NAME?.trim() || "";
+                const nameParts = fullName.split(/\s+/); // Splits by any whitespace
+
                 const userData = {
-                    name: data.DATA.PR_NAME,
-                    initials: data.DATA.PR_NAME.split(" ")[0][0] + data.DATA.PR_NAME.split(" ")[1][0],
-                    role: data?.DATA?.PR_JOB_ROLE
-                }
+                    name: fullName || "Guest",
+                    initials: nameParts.length > 1
+                        ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                        : (nameParts[0]?.[0] || "U").toUpperCase(), // "U" for Unknown if empty
+                    role: data?.DATA?.PR_JOB_ROLE || "User"
+                };
+                console.log("userdata - ", userData);
+
 
 
                 if (data.STATUS == "SUCCESS") {
@@ -182,7 +189,7 @@ const LoginPage = () => {
 
 
         } catch (error) {
-            alert(error.toString);
+            alert(error.toString());
         }
 
 

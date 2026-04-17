@@ -305,8 +305,8 @@ export default function DigiGyanPanel() {
                         whileHover={{
                             scale: 1.05,
                             rotate: -3,
-                            backgroundColor: "#ffffff", // Matches the group-hover:bg-white
-                            color: "#bebebe" // Inverts icon color on hover for visibility
+                            backgroundColor: "#ffffff",
+                            color: "#bebebe"
                         }}
                         whileTap={{ scale: 0.95 }}
                         className=" bg-white/20"
