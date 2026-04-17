@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useApp } from '@/context/AppContext';
 import { Loader2 } from 'lucide-react';
+import { motion } from "framer-motion";
 
 const VideoPlayerPage = () => {
     const router = useRouter();
@@ -94,7 +95,6 @@ const VideoPlayerPage = () => {
         );
     }
 
-    // Helper to extract YouTube ID
     const extractYoutubeEmbedUrl = (url) => {
         if (!url) return null;
         if (url.includes('youtube.com/watch?v=')) return `https://www.youtube.com/embed/${url.split('v=')[1]?.split('&')[0]}`;
@@ -102,6 +102,32 @@ const VideoPlayerPage = () => {
         return url;
     };
 
+
+
+    const handleDownload = async (url, title) => {
+        try {
+
+            console.log(url, title);
+
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            // Sets the filename (e.g., "SongTitle.mp3")
+            link.download = `${title || 'download'}.mp3`;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error("Download failed:", error);
+            // Fallback: just open the link if fetch fails
+            window.open(url, '_blank');
+        }
+    };
     const isYouTube = activeVideo?.PR_VIDEO_URL?.includes('youtube.com') || activeVideo?.PR_VIDEO_URL?.includes('youtu.be');
 
     return (
@@ -234,11 +260,89 @@ const VideoPlayerPage = () => {
                                 </div>
                             </div>
 
-                            <div style={{ background: "white", borderRadius: "35px", padding: "25px 30px", border: "6px solid white", boxShadow: "0 15px 30px rgba(108, 92, 231, 0.08)", marginBottom: "20px" }}>
-                                <span style={{ background: "#FF6B6B", color: "white", padding: "6px 16px", borderRadius: "50px", fontSize: 12, fontWeight: 900, textTransform: "uppercase", display: "inline-block", marginBottom: 10 }}>
+
+                            {/* TV BUTTON */}
+
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-5 p-5 md:px-[30px] md:py-[25px] bg-white border-[6px] border-white rounded-[25px] md:rounded-[35px] shadow-[0_15px_30px_rgba(108,92,231,0.08)] mb-5">
+
+                                <span style={{
+                                    background: "linear-gradient(145deg, #ffcbcbff, #e78a8aff)",
+                                }} className="text-white px-[18px] py-2 rounded-xl text-[10px] font-[900] uppercase tracking-wider border border-white/20 whitespace-nowrap">
                                     Now Playing ▶️
                                 </span>
 
+                                <span className="w-full md:w-auto md:flex-1 text-[#2d3436] px-4 py-3 md:mx-5 text-sm md:text-base font-extrabold font-mono bg-[#e3e8ec] rounded-lg text-center shadow-[inset_2px_2px_5px_rgba(0,0,0,0.05)] break-words">
+                                    {activeVideo.PR_TITLE}
+                                </span>
+
+
+
+                                <motion.button
+                                    onClick={() => handleDownload(activeVideo.PR_VIDEO_URL, activeVideo.PR_TITLE)}
+
+                                    // 1. Initial & Hover states
+                                    initial={{ scale: 1 }}
+                                    whileHover={{
+                                        scale: 1.05,
+                                        filter: "brightness(1.1)",
+                                    }}
+
+                                    // 2. The "Physical Click" animation
+                                    whileTap={{
+                                        scale: 0.95,
+                                        translateY: 4, // Sinks into the "shadow"
+                                        boxShadow: "0 0px 0 #b33939, 0 2px 5px rgba(255, 107, 107, 0.2)" // Shadow disappears as it's pressed
+                                    }}
+
+                                    style={{
+                                        position: "relative",
+                                        overflow: "hidden", // Keeps the shimmer inside
+                                        boxShadow: "0 4px 0 #b33939, 0 8px 15px rgba(255, 107, 107, 0.4)",
+                                        background: "linear-gradient(145deg, #ff7676, #e66060)",
+                                        cursor: "pointer",
+                                        transition: "box-shadow 0.1s ease" // Smooth shadow transition
+                                    }}
+                                    className="text-white px-[18px] py-2 rounded-xl text-[10px] font-[900] uppercase tracking-wider border border-white/20 whitespace-nowrap outline-none"
+                                >
+                                    {/* 3. Subtle Scanning Shimmer Effect */}
+                                    <motion.div
+                                        animate={{ x: [-100, 200] }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            repeatDelay: 3,
+                                            ease: "linear"
+                                        }}
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            width: "30%",
+                                            height: "100%",
+                                            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                                            transform: "skewX(-25deg)",
+                                        }}
+                                    />
+
+                                    {/* 4. The Content */}
+                                    <span style={{ position: "relative", zIndex: 1 }}>
+                                        DOWNLOAD ⬇️
+                                    </span>
+
+                                    {/* 5. Pulsing Glow (Optional background ring) */}
+                                    <motion.div
+                                        animate={{ opacity: [0.4, 0.7, 0.4] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                        style={{
+                                            position: "absolute",
+                                            inset: 0,
+                                            borderRadius: "inherit",
+                                            background: "white",
+                                            mixBlendMode: "overlay",
+                                            pointerEvents: "none"
+                                        }}
+                                    />
+                                </motion.button>
                             </div>
                         </>
                     )}
@@ -304,8 +408,8 @@ const VideoPlayerPage = () => {
                     </div>
                 </div>
 
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
 
