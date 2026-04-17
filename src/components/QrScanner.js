@@ -16,6 +16,7 @@ const QrScanner = ({ onResult }) => {
                 // scanner.clear(); 
             },
             (error) => {
+                console.log(error);
                 // Log errors only if necessary, as this fires constantly
             }
         );
