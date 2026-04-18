@@ -143,7 +143,7 @@ const ManualEntry = () => {
                     {/* Step 1: Series (Compact & Scrollable) */}
                     <div className="flex flex-col gap-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Series Shelf</label>
-                        <div className="compact-scroll overflow-y-auto pr-2 flex flex-col gap-1.5 max-h-[280px] md:max-h-[350px] bg-slate-50/50 p-2 rounded-[25px] border-2 border-slate-100">
+                        <div className="compact-scroll overflow-y-auto pr-2 flex flex-col gap-1.5 max-h-[240px] md:max-h-[280px] bg-slate-50/50 p-2 rounded-[25px] border-2 border-slate-100">
                             {loading.cats ? (
                                 <div className="p-4 flex justify-center"><Loader2 className="animate-spin text-[#6C5CE7]" size={20} /></div>
                             ) : (
@@ -171,28 +171,42 @@ const ManualEntry = () => {
                     <AnimatePresence>
                         {selectedCat && (
                             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Grade</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {loading.classes ? (
-                                        <div className="col-span-2 py-2 flex justify-center"><Loader2 className="animate-spin text-[#55EFC4]" size={20} /></div>
-                                    ) : (
-                                        classes.map(cls => (
-                                            <button
-                                                key={cls.PR_CLASS_ID}
-                                                onClick={() => setSelectedClass(cls)}
-                                                className={`py-3 px-1 rounded-[15px] font-black text-xs transition-all border-2
-                                                    ${selectedClass?.PR_CLASS_ID === cls.PR_CLASS_ID
-                                                        ? 'bg-[#FFD93D] text-slate-800 border-[#FFD93D] shadow-sm'
-                                                        : 'bg-white text-[#6C5CE7] border-[#F0F4FF] hover:border-[#FFD93D]'}`}
-                                            >
-                                                {cls.PR_NAME}
-                                            </button>
-                                        ))
-                                    )}
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Grade</label>
+
+                                    {/* Outer Wrapper: Handles ONLY the scrolling, background, and max-height */}
+                                    <div className="compact-scroll overflow-y-auto max-h-[280px] md:max-h-[240px] bg-slate-50/50 p-2 rounded-[25px] border-2 border-slate-100">
+
+                                        {/* Inner Wrapper: Handles ONLY the grid layout */}
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {loading.classes ? (
+                                                <div className="col-span-2 py-4 flex justify-center">
+                                                    <Loader2 className="animate-spin text-[#55EFC4]" size={20} />
+                                                </div>
+                                            ) : (
+                                                classes.map(cls => (
+                                                    <button
+                                                        key={cls.PR_CLASS_ID}
+                                                        onClick={() => setSelectedClass(cls)}
+                                                        className={`py-3 px-1 rounded-[15px] font-black text-xs transition-all border-2
+                                    ${selectedClass?.PR_CLASS_ID === cls.PR_CLASS_ID
+                                                                ? 'bg-[#FFD93D] text-slate-800 border-[#FFD93D] shadow-sm'
+                                                                : 'bg-white text-[#6C5CE7] border-[#F0F4FF] hover:border-[#FFD93D]'}`}
+                                                    >
+                                                        {cls.PR_NAME}
+                                                    </button>
+                                                ))
+                                            )}
+                                        </div>
+
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+
+
                 </motion.aside>
 
                 {/* --- BOOKSHELF AREA --- */}
