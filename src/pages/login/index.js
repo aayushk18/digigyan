@@ -79,7 +79,7 @@ const LoginPage = () => {
     const handleSeriesSelect = (cat) => {
         setSeries(cat.PR_NAME);
         setSeriesId(cat.PR_CATEGORY_ID);
-        router.push('/category/books');
+        router.push(`/category/books?categoryId=${cat.PR_CATEGORY_ID}`);
     };
 
     // Step 1: Handle Phone Submission & Trigger OTP Modal
