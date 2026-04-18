@@ -47,6 +47,100 @@ export default function DigiGyanPanel() {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
 
+
+    // Add these to your state declarations
+    const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+    const [videoList, setVideoList] = useState([]);
+    const [isFetchingVideos, setIsFetchingVideos] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState({}); // Stores % for each video by ID
+    const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+
+
+    const openDownloadModal = async (bookId) => {
+        setDownloadModalOpen(true);
+        setIsFetchingVideos(true);
+        setVideoList([]); // Reset list
+        setDownloadProgress({}); // Reset progress
+
+        console.log("bookId");
+
+
+        try {
+            const response = await fetch('https://apis.tlmate.com/content-api/book-content-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    CBT_REQUEST_DATA: {
+                        PR_BOOK_ID: parseInt(bookId),
+                        PR_TOKEN: config.PR_TOKEN,
+                        PR_APP_KEY: config.PR_APP_KEY
+                    }
+                })
+            });
+            const result = await response.json();
+
+            if (result.STATUS === "SUCCESS" && result.DATA?.PR_VIDEO_DATA) {
+                setVideoList(result.DATA.PR_VIDEO_DATA);
+            }
+        } catch (error) {
+            console.error("Error fetching video content:", error);
+        } finally {
+            setIsFetchingVideos(false);
+        }
+    };
+
+    const downloadSingleVideo = (url, filename, id) => {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.responseType = 'blob'; // Important for file downloads
+
+            xhr.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+                    setDownloadProgress(prev => ({ ...prev, [id]: percentComplete }));
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const blob = xhr.response;
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = filename ? `${filename}.mp4` : `Video_${id}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(downloadUrl);
+                    resolve();
+                } else {
+                    reject('Download failed');
+                }
+            };
+
+            xhr.onerror = () => reject('Network error');
+            xhr.send();
+        });
+    };
+
+    const downloadAllVideos = async () => {
+        if (isDownloadingAll || videoList.length === 0) return;
+
+        setIsDownloadingAll(true);
+        for (const video of videoList) {
+            try {
+                await downloadSingleVideo(video.PR_URL, video.PR_NAME, video.PR_ID);
+            } catch (error) {
+                console.error(`Failed to download ${video.PR_NAME}:`, error);
+                // Optionally, you could set an error state here for the specific video
+            }
+        }
+        setIsDownloadingAll(false);
+    };
+
+
+
     // Dropdown Animation Variants
     const dropdownVars = {
         hidden: { opacity: 0, y: -20, scale: 0.9, transformOrigin: "top right" },
@@ -585,6 +679,7 @@ export default function DigiGyanPanel() {
                             )}
 
                             {/* --- VIEW 2: ANIMATIONS UI --- */}
+                            {/* --- VIEW 2: ANIMATIONS UI --- */}
                             {activeNav === "animations" && (
                                 <>
                                     <div className="image-frame">
@@ -594,7 +689,20 @@ export default function DigiGyanPanel() {
                                     <h3 style={{ margin: "0 0 10px 0", fontSize: 18, fontWeight: 900, color: "#2D3436", lineHeight: 1.2 }}>{book.PR_NAME} - Toon</h3>
                                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 15 }}>
                                         <button className="bouncy-btn" style={{ background: "#FF6B6B", color: "white", opacity: book.PR_VIDEO_DATA?.length > 0 ? 1 : 0.5 }} onClick={(e) => { e.stopPropagation(); if (book.PR_VIDEO_DATA?.length > 0) router.push(`/subjects/video?bookid=${book.PR_ID}`); }}>Watch 🍿</button>
-                                        <button className="bouncy-btn" style={{ background: "#fff7f7ff", color: "#FF6B6B" }} onClick={(e) => e.stopPropagation()}>Download ⬇️</button>
+
+                                        {/* UPDATED BUTTON HERE */}
+                                        <button
+                                            className="bouncy-btn"
+                                            style={{ background: "#fff7f7ff", color: "#FF6B6B" }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openDownloadModal(book.PR_ID);
+                                                console.log("bookId", book.PR_ID);
+
+                                            }}
+                                        >
+                                            Download ⬇️
+                                        </button>
                                     </div>
                                 </>
                             )}
@@ -622,7 +730,128 @@ export default function DigiGyanPanel() {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+
+
+
+
+                {/* DOWNLOAD MODAL */}
+                <AnimatePresence>
+                    {downloadModalOpen && (
+                        <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+                            {/* Backdrop Blur */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => !isDownloadingAll && setDownloadModalOpen(false)}
+                                style={{ position: "absolute", inset: 0, background: "rgba(45, 52, 54, 0.4)", backdropFilter: "blur(8px)" }}
+                            />
+
+                            {/* Modal Card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                                style={{
+                                    position: "relative", width: "100%", maxWidth: "500px", background: "white",
+                                    borderRadius: "32px", padding: "30px", border: "6px solid white",
+                                    boxShadow: "0 25px 50px rgba(108, 92, 231, 0.25)", overflow: "hidden",
+                                    display: "flex", flexDirection: "column", maxHeight: "80vh"
+                                }}
+                            >
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "4px dashed #F0F4FF", paddingBottom: "15px", marginBottom: "20px" }}>
+                                    <h2 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: "#2D3436" }}>📥 Download Magic</h2>
+                                    {!isDownloadingAll && (
+                                        <button onClick={() => setDownloadModalOpen(false)} style={{ background: "#F1F2F6", border: "none", width: 36, height: 36, borderRadius: "12px", cursor: "pointer", fontWeight: 900, color: "#636E72" }}>✕</button>
+                                    )}
+                                </div>
+
+                                {isFetchingVideos ? (
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 0" }}>
+                                        <Loader2 className="animate-spin text-indigo-500 mb-4" size={40} />
+                                        <p style={{ fontWeight: 800, color: "#6C5CE7" }}>Gathering videos...</p>
+                                    </div>
+                                ) : videoList.length > 0 ? (
+                                    <>
+                                        <div style={{ overflowY: "auto", paddingRight: "10px", flex: 1, display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
+
+                                            {videoList.map((vid, index) => {
+                                                const progress = downloadProgress[vid.PR_ID] || 0;
+                                                return (
+                                                    <motion.div
+                                                        key={vid.PR_ID}
+                                                        initial={{ opacity: 0, x: -30 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{
+                                                            type: "spring",
+                                                            stiffness: 300,
+                                                            damping: 24,
+                                                            delay: index * 0.1 // Staggers each item by 0.1s
+                                                        }}
+                                                        // Added flex and items-center here
+                                                        className="relative flex items-center overflow-hidden rounded-[20px] border-[3px] border-[#E0DAFF] bg-[#F8F9FF] p-[15px]"
+                                                    >
+                                                        {/* Progress Bar Background */}
+                                                        <div
+                                                            className="absolute left-0 top-0 z-0 h-full bg-[#E8FFF7] transition-all duration-300 ease-in-out"
+                                                            style={{ width: `${progress}%` }}
+                                                        />
+
+                                                        {/* Added w-full here to stretch across the flex parent */}
+                                                        <div className="relative z-10 flex w-full items-center justify-between">
+                                                            {/* Added flex items-center and leading-none to ensure the emoji and text align perfectly */}
+                                                            <p className="m-0 flex max-w-[70%] items-center truncate text-[15px] font-extrabold leading-none text-[#2D3436]">
+                                                                🎬 <span className="ml-2 truncate">{vid.PR_TITLE || "Animation Video"}</span>
+                                                            </p>
+
+                                                            {progress > 0 && progress < 100 ? (
+                                                                <span className="text-[14px] font-black leading-none text-[#00B894]">{progress}%</span>
+                                                            ) : progress === 100 ? (
+                                                                <span className="text-[14px] font-black leading-none text-[#00B894]">✅ Done</span>
+                                                            ) : (
+                                                                <span className="text-[14px] font-black leading-none text-[#A29BFE]">Wait</span>
+                                                            )}
+                                                        </div>
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <motion.button
+                                            whileHover={{ scale: isDownloadingAll ? 1 : 1.03 }}
+                                            whileTap={{ scale: isDownloadingAll ? 1 : 0.97 }}
+                                            onClick={downloadAllVideos}
+                                            disabled={isDownloadingAll}
+                                            style={{
+                                                background: isDownloadingAll ? "#B2BEC3" : "#6C5CE7", color: "white", border: "4px solid white",
+                                                padding: "16px", borderRadius: "50px", fontSize: "18px", fontWeight: 900, cursor: isDownloadingAll ? "not-allowed" : "pointer",
+                                                boxShadow: isDownloadingAll ? "none" : "0 10px 0 0 #5f4ed1, 0 15px 25px rgba(108, 92, 231, 0.4)",
+                                                outline: "none", width: "100%", transition: "background 0.3s"
+                                            }}
+                                        >
+                                            {isDownloadingAll ? "Downloading Magic... ⏳" : "Download All 🚀"}
+                                        </motion.button>
+                                    </>
+                                ) : (
+                                    <div style={{ textAlign: "center", padding: "30px 0" }}>
+                                        <span style={{ fontSize: 40 }}>🤷‍♂️</span>
+                                        <p style={{ fontWeight: 800, color: "#2D3436", marginTop: 10 }}>No animations found in this book!</p>
+                                    </div>
+                                )}
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+
+            </div >
+
+
+
+
+
+
+        </div >
     );
 }
