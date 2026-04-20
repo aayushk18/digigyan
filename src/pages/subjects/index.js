@@ -143,7 +143,7 @@ const ManualEntry = () => {
                     {/* Step 1: Series (Compact & Scrollable) */}
                     <div className="flex flex-col gap-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Series Shelf</label>
-                        <div className="compact-scroll overflow-y-auto pr-2 flex flex-col gap-1.5 max-h-[240px] md:max-h-[280px] bg-slate-50/50 p-2 rounded-[25px] border-2 border-slate-100">
+                        <div className="compact-scroll overflow-y-auto pr-2 flex flex-col gap-1.5 max-h-[240px] md:max-h-[240px] bg-slate-50/50 p-2 rounded-[25px] border-2 border-slate-100">
                             {loading.cats ? (
                                 <div className="p-4 flex justify-center"><Loader2 className="animate-spin text-[#6C5CE7]" size={20} /></div>
                             ) : (
