@@ -175,7 +175,7 @@ const ManualEntry = () => {
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Grade</label>
 
                                     {/* Outer Wrapper: Handles ONLY the scrolling, background, and max-height */}
-                                    <div className="compact-scroll overflow-y-auto max-h-[280px] md:max-h-[240px] bg-slate-50/50 p-2 rounded-[25px] border-2 border-slate-100">
+                                    <div className="compact-scroll overflow-y-auto max-h-[240px] md:max-h-[200px] bg-slate-50/50 p-2 rounded-[25px] border-2 border-slate-100">
 
                                         {/* Inner Wrapper: Handles ONLY the grid layout */}
                                         <div className="grid grid-cols-2 gap-2">
