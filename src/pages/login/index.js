@@ -342,13 +342,19 @@ const LoginPage = () => {
                                     >
                                         <div className="mini-image-frame">
                                             {cat.firstBookImg ? (
-                                                <img src={cat.firstBookImg} className="w-full h-full object-cover" alt="" />
+                                                <img src={cat.firstBookImg} className="w-full h-full object-cover" alt={cat.PR_NAME} />
+                                            ) : cat.PR_ICON ? (
+                                                /* Uses PR_ICON if firstBookImg is missing */
+                                                <img src={cat.PR_ICON} className="w-full h-full object-contain p-1" alt={cat.PR_NAME} />
                                             ) : (
+                                                /* Falls back to the original emoji if both images are missing */
                                                 <span className="text-4xl">{style.emoji}</span>
                                             )}
                                         </div>
                                         <div className="text-center w-full bg-white/90 rounded-xl py-1 px-2">
-                                            <p className="text-[#2D3436] font-black text-[11px] md:text-xs leading-tight truncate">{cat.PR_NAME}</p>
+                                            <p className="text-[#2D3436] font-black text-[11px] md:text-xs leading-tight truncate">
+                                                {cat.PR_NAME}
+                                            </p>
                                         </div>
                                     </motion.div>
                                 );

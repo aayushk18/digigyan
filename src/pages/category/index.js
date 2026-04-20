@@ -290,6 +290,13 @@ const CategoriesPage = () => {
                                                     alt={cat.PR_NAME}
                                                     style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "20px" }}
                                                 />
+                                            ) : cat.PR_ICON ? (
+                                                /* Added PR_ICON fallback here */
+                                                <img
+                                                    src={cat.PR_ICON}
+                                                    alt={cat.PR_NAME}
+                                                    style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "20px", padding: "10px" }}
+                                                />
                                             ) : (
                                                 <span className="floating" style={{ fontSize: 60, filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.2))" }}>
                                                     {style.emoji}
