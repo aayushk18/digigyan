@@ -326,9 +326,10 @@ const LoginPage = () => {
                     </motion.div>
 
                     {/* Grid Area */}
+                    {/* Grid Area */}
                     <div className="flex-1 min-h-0 w-full relative">
                         <motion.div variants={containerVars} initial="hidden" animate="visible"
-                            className="grid grid-cols-3 md:grid-cols-3 gap-4 h-[75%] md:h-full pb-10"
+                            className="grid grid-cols-3 grid-rows-3 gap-3 md:gap-4 h-[75%] md:h-full pb-10"
                         >
                             {covers.slice(0, typeof window !== 'undefined' && window.innerWidth < 768 ? 9 : 9).map((cat, i) => {
                                 const style = cardStyles[i % cardStyles.length];
@@ -337,21 +338,21 @@ const LoginPage = () => {
                                         key={cat.PR_CATEGORY_ID}
                                         variants={cardVars}
                                         onClick={() => handleSeriesSelect(cat)}
-                                        className="mini-sticker-card"
-                                        style={{ backgroundColor: style.bg }}
+                                        className="mini-sticker-card flex flex-col justify-between p-2 md:p-3"
+                                        style={{ backgroundColor: style.bg, height: "100%" }}
                                     >
-                                        <div className="mini-image-frame">
+                                        <div className="mini-image-frame flex-1 min-h-0 w-full relative mb-1 md:mb-2 flex items-center justify-center overflow-hidden rounded-md">
                                             {cat.firstBookImg ? (
                                                 <img src={cat.firstBookImg} className="w-full h-full object-cover" alt={cat.PR_NAME} />
                                             ) : cat.PR_ICON ? (
-                                                /* Uses PR_ICON if firstBookImg is missing */
                                                 <img src={cat.PR_ICON} className="w-full h-full object-contain p-1" alt={cat.PR_NAME} />
                                             ) : (
-                                                /* Falls back to the original emoji if both images are missing */
-                                                <span className="text-4xl">{style.emoji}</span>
+                                                <span className="text-3xl md:text-4xl">{style.emoji}</span>
                                             )}
                                         </div>
-                                        <div className="text-center w-full bg-white/90 rounded-xl py-1 px-2">
+
+                                        {/* Text Container stays the same, but now it will be pushed to the bottom cleanly */}
+                                        <div className="text-center w-full bg-white/90 rounded-xl py-1 px-2 shrink-0">
                                             <p className="text-[#2D3436] font-black text-[11px] md:text-xs leading-tight truncate">
                                                 {cat.PR_NAME}
                                             </p>
