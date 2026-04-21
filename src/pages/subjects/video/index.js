@@ -394,12 +394,15 @@ const VideoPlayerPage = () => {
 
                                         <div className="item-details">
                                             <h4 style={{ fontSize: 15, fontWeight: 900, margin: 0, color: isPlaying ? "#6C5CE7" : "#2D3436", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                                                {video.PR_PART == "" ? video.PR_TITLE : video.PR_PART}
+                                                {video.PR_TITLE}
                                             </h4>
 
-                                            <div className="status-pill" style={{ background: isPlaying ? "#6C5CE7" : "#FFEAA7", color: isPlaying ? "white" : "#D6A317" }}>
-                                                {isPlaying ? "⚡ Playing" : "📂 Play"}
-                                            </div>
+                                            {video.PR_PART == "" ?
+                                                (<></>) : (
+                                                    <div className="status-pill" style={{ background: isPlaying ? "#6C5CE7" : "#FFEAA7", color: isPlaying ? "white" : "#D6A317" }}>
+                                                        {video.PR_PART}
+                                                    </div>
+                                                )}
                                         </div>
                                     </button>
                                 );
